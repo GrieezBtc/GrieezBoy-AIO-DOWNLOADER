@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>GreeezBoy AIO DOWNLOADER</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    * { box-sizing: border-box; font-family: Arial, sans-serif; }
+    body {
+      margin: 0;
+      background: #0f172a;
+      color: #e5e7eb;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .room {
+      width: 100%;
+      max-width: 520px;
+      background: #020617;
+      border-radius: 14px;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      font-size: 20px;
+      margin-bottom: 16px;
+    }
+    .platforms {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    .platforms button {
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      background: #1e293b;
+      color: #fff;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .platforms button.active {
+      background: #2563eb;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #334155;
+      background: #020617;
+      color: #e5e7eb;
+      margin-top: 10px;
+    }
+    button.action {
+      margin-top: 10px;
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      background: #2563eb;
+      color: #fff;
+      cursor: pointer;
+    }
+    .hidden { display: none; }
+    .status {
+      margin-top: 12px;
+      font-size: 14px;
+      text-align: center;
+    }
+    .error { color: #f87171; }
+    .results {
+      margin-top: 15px;
+    }
+    .media-item {
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="room">
+    <h1>All Media Downloader</h1>
+
+    <!-- PLATFORM SELECTOR -->
+    <div class="platforms">
+      <button data-platform="instagram">Instagram</button>
+      <button data-platform="facebook">Facebook</button>
+      <button data-platform="tiktok">TikTok</button>
+      <button data-platform="twitter">Twitter</button>
+    </div>
+
+    <!-- INPUT ZONE -->
+    <input id="mediaUrl" class="hidden" placeholder="" />
+    <button id="analyzeBtn" class="action hidden">Analyze</button>
+
+    <!-- STATUS -->
+    <div id="status" class="status hidden"></div>
+
+    <!-- RESULTS -->
+    <div id="results" class="results hidden"></div>
+  </div>
+
+  <script>
+    let activePlatform = null;
+
+    const platformButtons = document.querySelectorAll(".platforms button");
+    const input = document.getElementById("mediaUrl");
+    const analyzeBtn = document.getElementById("analyzeBtn");
+    const statusBox = document.getElementById("status");
+    const results = document.getElementById("results");
+
+    platformButtons.forEach(btn => {
+      btn.onclick = () => {
+        platformButtons.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        activePlatform = btn.dataset.platform;
+
+        input.classList.remove("hidden");
+        analyzeBtn.classList.remove("hidden");
+        results.classList.add("hidden");
+        statusBox.classList.add("hidden");
+
+        input.value = "";
+        input.placeholder = `Paste ${activePlatform} link here`;
+      };
+    });
+
+    analyzeBtn.onclick = async () => {
+      const url = input.value.trim();
+      if (!url || !activePlatform) return;
+
+      statusBox.textContent = "Analyzing media…";
+      statusBox.classList.remove("hidden");
+      results.classList.add("hidden");
+
+      // MOCK — backend integration comes later
+      await new Promise(r => setTimeout(r, 1200));
+
+      statusBox.classList.add("hidden");
+      results.innerHTML = "";
+      results.classList.remove("hidden");
+
+      const mockMedia = [
+        { id: "m1", type: "video", format: "mp4" }
+      ];
+
+      mockMedia.forEach(m => {
+        const div = document.createElement("div");
+        div.className = "media-item";
+        div.innerHTML = `
+          <div>Type: ${m.type}</div>
+          <div>Format: ${m.format}</div>
+          <button class="action" onclick="download('${m.id}')">Download</button>
+        `;
+        results.appendChild(div);
+      });
+    };
+
+    function download(id) {
+      alert(`Download ${id} from ${activePlatform}`);
+      // Future: GET /download/{platform}/{id}
+    }
+  </script>
+</body>
+</html>
