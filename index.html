@@ -6,14 +6,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#05070a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
 <style>
-/* ... Keeping your existing styles ... */
 :root {
+  /* Dark Mode (Default) */
   --bg-body: #05070a;
   --bg-room: #020617;
   --text-primary: #f8fafc;
+  --text-dim: #94a3b8;
   --border-dim: #1e293b;
+  --card-bg: #0f172a;
+  --input-bg: #000;
   --error: #ef4444;
+  
   --color-instagram: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
   --color-facebook: #1877F2;
   --color-youtube: #FF0000;
@@ -23,14 +32,45 @@
   --color-pinterest: #E60023;
 }
 
-* { box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
+/* Light Mode Theme Overrides */
+body.light-mode {
+  --bg-body: #f1f5f9;
+  --bg-room: #ffffff;
+  --text-primary: #0f172a;
+  --text-dim: #475569;
+  --border-dim: #e2e8f0;
+  --card-bg: #f8fafc;
+  --input-bg: #ffffff;
+}
+
+/* Visibility Fix for Threads in Light Mode */
+body.light-mode [data-platform="Threads"] .block-title {
+    color: #0f172a !important; 
+}
+
+* { box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; transition: background 0.3s ease, color 0.3s ease; }
 body, html { margin: 0; padding: 0; min-height: 100vh; background: var(--bg-body); color: var(--text-primary); display: flex; flex-direction: column; align-items: center; }
 
+/* TOP NAVIGATION BAR */
+.top-nav {
+    width: 100%; max-width: 650px; padding: 15px 20px;
+    display: flex; justify-content: space-between; align-items: center;
+    position: sticky; top: 0; z-index: 100;
+    background: var(--bg-body); border-bottom: 1px solid var(--border-dim);
+}
+
+.nav-btn {
+    background: rgba(148, 163, 184, 0.1); border: 1px solid var(--border-dim);
+    color: var(--text-primary); padding: 8px 14px; border-radius: 20px;
+    font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px;
+}
+.install-btn { background: #3b82f6; color: white; border: none; }
+
 .room { width: 100%; max-width: 650px; background: var(--bg-room); padding: 40px 20px; min-height: 100vh; border-left: 1px solid var(--border-dim); border-right: 1px solid var(--border-dim); display: flex; flex-direction: column; }
-h1 { text-align: center; font-size: 22px; letter-spacing: 2px; margin-bottom: 40px; color: #94a3b8; }
+h1 { text-align: center; font-size: 22px; letter-spacing: 2px; margin-bottom: 40px; color: var(--text-dim); }
 .media-list { display: flex; flex-direction: column; gap: 12px; flex-grow: 1; }
 
-.downloader-block { background: #0f172a; border: 1px solid var(--border-dim); padding: 20px; border-radius: 4px; cursor: pointer; transition: all 0.3s ease; position: relative; margin-bottom: 5px; }
+.downloader-block { background: var(--card-bg); border: 1px solid var(--border-dim); padding: 20px; border-radius: 4px; cursor: pointer; transition: all 0.3s ease; position: relative; margin-bottom: 5px; }
 .downloader-block.active { border-left: 6px solid var(--accent); }
 .block-header { display: flex; justify-content: space-between; align-items: center; }
 .block-title { font-weight: 700; font-size: 17px; text-transform: uppercase; }
@@ -44,13 +84,12 @@ h1 { text-align: center; font-size: 22px; letter-spacing: 2px; margin-bottom: 40
 [data-platform="Pinterest"] { --accent: #E60023; }
 .block-title { color: var(--accent); }
 
-.input-area { margin-top: 15px; display: none; padding-top: 15px; border-top: 1px solid #1e293b; }
+.input-area { margin-top: 15px; display: none; padding-top: 15px; border-top: 1px solid var(--border-dim); }
 .downloader-block.active .input-area { display: block; }
 
-/* NEW: Input Wrapper for Paste Button */
 .input-wrapper { position: relative; margin-bottom: 10px; }
-input { width: 100%; padding: 14px 80px 14px 14px; background: #000; border: 1px solid #334155; color: white; border-radius: 4px; outline: none; }
-.btn-paste { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: #1e293b; color: #94a3b8; border: none; padding: 6px 12px; border-radius: 4px; font-size: 11px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+input { width: 100%; padding: 14px 80px 14px 14px; background: var(--input-bg); border: 1px solid var(--border-dim); color: var(--text-primary); border-radius: 4px; outline: none; }
+.btn-paste { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: var(--border-dim); color: var(--text-dim); border: none; padding: 6px 12px; border-radius: 4px; font-size: 11px; font-weight: 700; cursor: pointer; transition: 0.2s; }
 .btn-paste:hover { background: #334155; color: #fff; }
 
 input.invalid { border-color: var(--error) !important; }
@@ -68,29 +107,37 @@ input.invalid { border-color: var(--error) !important; }
 [data-platform="Threads"] .btn-analyze   { background: #444; }
 [data-platform="Pinterest"] .btn-analyze { background: var(--color-pinterest); }
 
-.engine-container { margin-top: 15px; width: 100%; height: 400px; background: #000; border: 1px solid #334155; border-radius: 4px; position: relative; overflow: hidden; display: none; animation: slideIn 0.4s ease; }
+.engine-container { margin-top: 15px; width: 100%; height: 400px; background: #000; border: 1px solid var(--border-dim); border-radius: 4px; position: relative; overflow: hidden; display: none; animation: slideIn 0.4s ease; }
 iframe { width: 100%; height: 100%; border: none; position: relative; z-index: 1; }
 .loading-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; justify-content: center; align-items: center; color: #64748b; font-size: 14px; z-index: 2; }
 
 footer { width: 100%; padding: 30px 10px; margin-top: 40px; text-align: center; background: rgba(15, 23, 42, 0.5); border-top: 1px solid var(--border-dim); }
-.dev-label { font-size: 12px; color: #475569; letter-spacing: 2px; margin-bottom: 15px; display: block; }
+.dev-label { font-size: 12px; color: var(--text-dim); letter-spacing: 2px; margin-bottom: 15px; display: block; }
 .social-links { display: flex; justify-content: center; gap: 20px; margin-bottom: 20px; }
-.social-links a { color: #94a3b8; font-size: 22px; text-decoration: none; transition: all 0.3s ease; }
+.social-links a { color: var(--text-dim); font-size: 22px; text-decoration: none; transition: all 0.3s ease; }
 .social-links a:hover { transform: translateY(-3px); }
 .social-links .fa-whatsapp:hover { color: #25D366; }
 .social-links .fa-telegram:hover { color: #0088cc; }
 .social-links .fa-instagram:hover { color: #E1306C; }
-.social-links .fa-x-twitter:hover { color: #fff; }
-.copyright { font-size: 10px; color: #475569; letter-spacing: 1px; }
+.social-links .fa-x-twitter:hover { color: var(--text-primary); }
+.copyright { font-size: 10px; color: var(--text-dim); letter-spacing: 1px; }
 
 @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 </head>
 <body>
 
-<div class="room">
-  <h1>GRIEEZBOY AIO DOWNLOADER</h1>
+<div class="top-nav">
+    <button class="nav-btn install-btn" id="pwaBtn">
+        <i class="fa-solid fa-cloud-arrow-down"></i> Install App
+    </button>
+    <button class="nav-btn" onclick="toggleTheme()">
+        <i class="fa-solid fa-moon" id="themeIcon"></i> <span id="themeText">Dark Mode</span>
+    </button>
+</div>
 
+<div class="room">
+  <h1>GRIEEZBOY DOWNLOADER</h1>
   <div class="media-list"></div>
 
   <footer>
@@ -108,6 +155,33 @@ footer { width: 100%; padding: 30px 10px; margin-top: 40px; text-align: center; 
 </div>
 
 <script>
+// --- PWA SERVICE WORKER REGISTRATION ---
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+}
+
+let deferredPrompt;
+const installBtn = document.getElementById('pwaBtn');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.style.display = 'flex';
+});
+
+installBtn.addEventListener('click', async () => {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+            deferredPrompt = null;
+            installBtn.style.display = 'none';
+        }
+    } else {
+        alert("To install: Tap your browser menu (3 dots) and select 'Add to Home Screen'");
+    }
+});
+
 const platforms = [
     { name: 'Instagram', pattern: /instagram\.com|instagr\.am/i, engineUrl: 'https://instagram-six-iota.vercel.app/?url=' },
     { name: 'Facebook', pattern: /facebook\.com|fb\.watch|fb\.com/i, engineUrl: 'https://facebook-cyan-seven.vercel.app/?url=' },
@@ -155,7 +229,22 @@ platforms.forEach(p => {
     listContainer.appendChild(block);
 });
 
-// NEW: Handlers for Clipboard Paste
+function toggleTheme() {
+    const body = document.body;
+    const icon = document.getElementById('themeIcon');
+    const text = document.getElementById('themeText');
+    
+    body.classList.toggle('light-mode');
+    
+    if(body.classList.contains('light-mode')) {
+        icon.className = 'fa-solid fa-sun';
+        text.innerText = 'Light Mode';
+    } else {
+        icon.className = 'fa-solid fa-moon';
+        text.innerText = 'Dark Mode';
+    }
+}
+
 async function handlePaste(btn) {
     event.stopPropagation();
     const input = btn.closest('.input-wrapper').querySelector('input');
@@ -165,7 +254,7 @@ async function handlePaste(btn) {
         btn.textContent = "DONE";
         setTimeout(() => btn.textContent = "PASTE", 1000);
     } catch (err) {
-        alert("Please allow clipboard permissions in your browser!");
+        alert("Please allow clipboard permissions!");
     }
 }
 
@@ -211,4 +300,4 @@ function handleProcess(btn, platformName) {
 </script>
 
 </body>
-</html>
+  </html>
