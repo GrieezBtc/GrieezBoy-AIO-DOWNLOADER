@@ -45,6 +45,7 @@ h1 { text-align: center; font-size: 22px; letter-spacing: 2px; margin-bottom: 40
   background: #0f172a; border: 1px solid var(--border-dim);
   padding: 20px; border-radius: 4px; cursor: pointer;
   transition: all 0.3s ease; position: relative;
+  margin-bottom: 5px;
 }
 
 .downloader-block.active { border-left: 6px solid var(--accent); }
@@ -140,27 +141,23 @@ iframe {
 <body>
 
 <div class="room">
-  <h1>GrieezBoy AIO Downloader</h1>
+  <h1>GRIEEZBOY AIO DOWNLOADER</h1>
 
   <div class="media-list"></div>
 </div>
 
 <script>
-/** * PASTE YOUR EXTERNAL DOWNLOADER LINKS BELOW 
- * Format: 'https://your-other-site.com/download?url='
- */
+/** * PASTE YOUR EXTERNAL DOWNLOADER LINKS BELOW */
 const platforms = [
-    { name: 'Instagram', pattern: /instagram\.com/i, engineUrl: 'https://YOUR_INSTAGRAM_ENGINE_URL.com?url=' },
-    { name: 'Facebook', pattern: /facebook\.com|fb\.watch/i, engineUrl: 'https://facebook-cyan-seven.vercel.app/?url=' },
-    { name: 'YouTube', pattern: /youtube\.com|youtu\.be/i, 
-    // Notice we removed "yt-engine.html" because it is now "index.html"
-    engineUrl: 'https://youtube-downloader-ten-pied.vercel.app/?url=' },
+    { name: 'Instagram', pattern: /instagram\.com|instagr\.am/i, engineUrl: 'https://instagram-downloader-indol.vercel.app/?url=' },
+    { name: 'Facebook', pattern: /facebook\.com|fb\.watch|fb\.com/i, engineUrl: 'https://facebook-cyan-seven.vercel.app/?url=' },
+    { name: 'YouTube', pattern: /youtube\.com|youtu\.be/i, engineUrl: 'https://youtube-downloader-ten-pied.vercel.app/?url=' },
     { name: 'TikTok', pattern: /tiktok\.com/i, engineUrl: 'https://tiktok-downloader-delta-lovat.vercel.app/?url=' },
     { name: 'Twitter', pattern: /twitter\.com|x\.com/i, engineUrl: 'https://twitter-downloader-indol.vercel.app/?url=' },
-    { name: 'Threads', pattern: /threads\.(net|com)/i, // This catches both .net and .com
-      engineUrl: 'https://thread-downloader-beryl.vercel.app/?url=' }
-    { name: 'Pinterest', pattern: /pinterest\.com|pin\.it/i, engineUrl: 'https://YOUR_PINTEREST_ENGINE_URL.com?url=' }
+    { name: 'Threads', pattern: /threads\.(net|com)/i, engineUrl: 'https://thread-downloader-beryl.vercel.app/?url=' },
+    { name: 'Pinterest', pattern: /pinterest\.com|pin\.it/i, engineUrl: 'https://pinterest-downloader-grieezboy.vercel.app/?url=' }
 ];
+
 const listContainer = document.querySelector('.media-list');
 
 platforms.forEach(p => {
@@ -170,25 +167,26 @@ platforms.forEach(p => {
     block.innerHTML = `
         <div class="block-header">
             <span class="block-title">${p.name}</span>
-            <small>Input Your Link Here</small>
+            <small style="color: #475569;">Tap to open</small>
         </div>
         <div class="input-area">
             <input type="text" placeholder="Paste ${p.name} link here..." onclick="event.stopPropagation()">
-            <div class="error-msg">Please enter a valid ${p.name} URL</div>
+            <div class="error-msg" style="display:none;">Please enter a valid ${p.name} URL</div>
             <button class="btn-analyze" onclick="handleProcess(this, '${p.name}')">
                 <div class="spinner"></div>
                 <span class="btn-text">Analyze & Download</span>
             </button>
             <div class="engine-container">
-                <div class="loading-overlay">Loading...</div>
+                <div class="loading-overlay">Loading GrieezBoy Engine...</div>
                 <iframe src="about:blank"></iframe>
             </div>
         </div>
     `;
     
     block.onclick = () => {
+        const isActive = block.classList.contains('active');
         document.querySelectorAll('.downloader-block').forEach(b => b.classList.remove('active'));
-        block.classList.add('active');
+        if(!isActive) block.classList.add('active');
     };
     
     listContainer.appendChild(block);
@@ -222,7 +220,7 @@ function handleProcess(btn, platformName) {
     // UI Loading State
     btn.disabled = true;
     spinner.style.display = 'block';
-    btnText.textContent = 'Verifying...';
+    btnText.textContent = 'Scanning...';
     
     setTimeout(() => {
         engineContainer.style.display = 'block';
