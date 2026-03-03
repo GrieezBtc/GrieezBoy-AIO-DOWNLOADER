@@ -4,16 +4,16 @@
 <meta charset="UTF-8" />
 <title>GrieezBoy AIO Downloader</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 <style>
+/* ... Keeping your existing styles ... */
 :root {
   --bg-body: #05070a;
   --bg-room: #020617;
   --text-primary: #f8fafc;
   --border-dim: #1e293b;
   --error: #ef4444;
-  
-  /* Brand Colors */
   --color-instagram: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
   --color-facebook: #1877F2;
   --color-youtube: #FF0000;
@@ -24,36 +24,17 @@
 }
 
 * { box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
+body, html { margin: 0; padding: 0; min-height: 100vh; background: var(--bg-body); color: var(--text-primary); display: flex; flex-direction: column; align-items: center; }
 
-body, html {
-  margin: 0; padding: 0; min-height: 100vh;
-  background: var(--bg-body); color: var(--text-primary);
-  display: flex; justify-content: center;
-}
-
-.room {
-  width: 100%; max-width: 650px; background: var(--bg-room);
-  padding: 40px 20px; min-height: 100vh;
-  border-left: 1px solid var(--border-dim); border-right: 1px solid var(--border-dim);
-}
-
+.room { width: 100%; max-width: 650px; background: var(--bg-room); padding: 40px 20px; min-height: 100vh; border-left: 1px solid var(--border-dim); border-right: 1px solid var(--border-dim); display: flex; flex-direction: column; }
 h1 { text-align: center; font-size: 22px; letter-spacing: 2px; margin-bottom: 40px; color: #94a3b8; }
+.media-list { display: flex; flex-direction: column; gap: 12px; flex-grow: 1; }
 
-.media-list { display: flex; flex-direction: column; gap: 12px; }
-
-.downloader-block {
-  background: #0f172a; border: 1px solid var(--border-dim);
-  padding: 20px; border-radius: 4px; cursor: pointer;
-  transition: all 0.3s ease; position: relative;
-  margin-bottom: 5px;
-}
-
+.downloader-block { background: #0f172a; border: 1px solid var(--border-dim); padding: 20px; border-radius: 4px; cursor: pointer; transition: all 0.3s ease; position: relative; margin-bottom: 5px; }
 .downloader-block.active { border-left: 6px solid var(--accent); }
-
 .block-header { display: flex; justify-content: space-between; align-items: center; }
 .block-title { font-weight: 700; font-size: 17px; text-transform: uppercase; }
 
-/* Dynamic Titles Color */
 [data-platform="Instagram"] { --accent: #dc2743; }
 [data-platform="Facebook"] { --accent: #1877F2; }
 [data-platform="YouTube"] { --accent: #FF0000; }
@@ -61,37 +42,24 @@ h1 { text-align: center; font-size: 22px; letter-spacing: 2px; margin-bottom: 40
 [data-platform="Twitter"] { --accent: #1DA1F2; }
 [data-platform="Threads"] { --accent: #ffffff; }
 [data-platform="Pinterest"] { --accent: #E60023; }
-
 .block-title { color: var(--accent); }
 
 .input-area { margin-top: 15px; display: none; padding-top: 15px; border-top: 1px solid #1e293b; }
 .downloader-block.active .input-area { display: block; }
 
-input {
-  width: 100%; padding: 14px; background: #000; border: 1px solid #334155;
-  color: white; border-radius: 4px; margin-bottom: 5px; outline: none;
-}
+/* NEW: Input Wrapper for Paste Button */
+.input-wrapper { position: relative; margin-bottom: 10px; }
+input { width: 100%; padding: 14px 80px 14px 14px; background: #000; border: 1px solid #334155; color: white; border-radius: 4px; outline: none; }
+.btn-paste { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: #1e293b; color: #94a3b8; border: none; padding: 6px 12px; border-radius: 4px; font-size: 11px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+.btn-paste:hover { background: #334155; color: #fff; }
 
 input.invalid { border-color: var(--error) !important; }
-
 .error-msg { color: var(--error); font-size: 12px; margin-bottom: 10px; display: none; }
 
-/* --- BUTTON WITH SPINNER --- */
-.btn-analyze {
-  width: 100%; padding: 14px; color: white; border: none;
-  font-weight: 800; cursor: pointer; border-radius: 4px;
-  display: flex; justify-content: center; align-items: center; gap: 10px;
-}
-
-.spinner {
-  width: 16px; height: 16px; border: 3px solid rgba(255, 255, 255, 0.3);
-  border-radius: 50%; border-top-color: #fff;
-  animation: spin 0.8s linear infinite;
-  display: none;
-}
+.btn-analyze { width: 100%; padding: 14px; color: white; border: none; font-weight: 800; cursor: pointer; border-radius: 4px; display: flex; justify-content: center; align-items: center; gap: 10px; }
+.spinner { width: 16px; height: 16px; border: 3px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top-color: #fff; animation: spin 0.8s linear infinite; display: none; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* Button Colors */
 [data-platform="Instagram"] .btn-analyze { background: var(--color-instagram); }
 [data-platform="Facebook"] .btn-analyze  { background: var(--color-facebook); }
 [data-platform="YouTube"] .btn-analyze   { background: var(--color-youtube); }
@@ -100,40 +68,20 @@ input.invalid { border-color: var(--error) !important; }
 [data-platform="Threads"] .btn-analyze   { background: #444; }
 [data-platform="Pinterest"] .btn-analyze { background: var(--color-pinterest); }
 
-/* IFRAME ENGINE STYLING */
-.engine-container {
-    margin-top: 15px;
-    width: 100%;
-    height: 400px;
-    background: #000;
-    border: 1px solid #334155;
-    border-radius: 4px;
-    position: relative;
-    overflow: hidden;
-    display: none;
-    animation: slideIn 0.4s ease;
-}
+.engine-container { margin-top: 15px; width: 100%; height: 400px; background: #000; border: 1px solid #334155; border-radius: 4px; position: relative; overflow: hidden; display: none; animation: slideIn 0.4s ease; }
+iframe { width: 100%; height: 100%; border: none; position: relative; z-index: 1; }
+.loading-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; justify-content: center; align-items: center; color: #64748b; font-size: 14px; z-index: 2; }
 
-iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-    position: relative;
-    z-index: 1;
-}
-
-/* LOADING OVERLAY */
-.loading-overlay {
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: #000;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #64748b;
-    font-size: 14px;
-    z-index: 2;
-}
+footer { width: 100%; padding: 30px 10px; margin-top: 40px; text-align: center; background: rgba(15, 23, 42, 0.5); border-top: 1px solid var(--border-dim); }
+.dev-label { font-size: 12px; color: #475569; letter-spacing: 2px; margin-bottom: 15px; display: block; }
+.social-links { display: flex; justify-content: center; gap: 20px; margin-bottom: 20px; }
+.social-links a { color: #94a3b8; font-size: 22px; text-decoration: none; transition: all 0.3s ease; }
+.social-links a:hover { transform: translateY(-3px); }
+.social-links .fa-whatsapp:hover { color: #25D366; }
+.social-links .fa-telegram:hover { color: #0088cc; }
+.social-links .fa-instagram:hover { color: #E1306C; }
+.social-links .fa-x-twitter:hover { color: #fff; }
+.copyright { font-size: 10px; color: #475569; letter-spacing: 1px; }
 
 @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 </style>
@@ -144,10 +92,22 @@ iframe {
   <h1>GRIEEZBOY AIO DOWNLOADER</h1>
 
   <div class="media-list"></div>
+
+  <footer>
+      <span class="dev-label">CONNECT WITH DEVELOPER</span>
+      <div class="social-links">
+          <a href="https://wa.me/2348107461934" target="_blank" class="fa-brands fa-whatsapp"></a>
+          <a href="https://t.me/GrieezBoy" target="_blank" class="fa-brands fa-telegram"></a>
+          <a href="https://instagram.com/grieezboy" target="_blank" class="fa-brands fa-instagram"></a>
+          <a href="https://x.com/Muhammadja71663" target="_blank" class="fa-brands fa-x-twitter"></a>
+      </div>
+      <div class="copyright">
+          &copy; 2026 GRIEEZBOY ENGINE • ALL RIGHTS RESERVED
+      </div>
+  </footer>
 </div>
 
 <script>
-/** * PASTE YOUR EXTERNAL DOWNLOADER LINKS BELOW */
 const platforms = [
     { name: 'Instagram', pattern: /instagram\.com|instagr\.am/i, engineUrl: 'https://instagram-six-iota.vercel.app/?url=' },
     { name: 'Facebook', pattern: /facebook\.com|fb\.watch|fb\.com/i, engineUrl: 'https://facebook-cyan-seven.vercel.app/?url=' },
@@ -170,7 +130,10 @@ platforms.forEach(p => {
             <small style="color: #475569;">Tap to open</small>
         </div>
         <div class="input-area">
-            <input type="text" placeholder="Paste ${p.name} link here..." onclick="event.stopPropagation()">
+            <div class="input-wrapper">
+                <input type="text" placeholder="Paste ${p.name} link here..." onclick="event.stopPropagation()">
+                <button class="btn-paste" onclick="handlePaste(this)">PASTE</button>
+            </div>
             <div class="error-msg" style="display:none;">Please enter a valid ${p.name} URL</div>
             <button class="btn-analyze" onclick="handleProcess(this, '${p.name}')">
                 <div class="spinner"></div>
@@ -192,6 +155,20 @@ platforms.forEach(p => {
     listContainer.appendChild(block);
 });
 
+// NEW: Handlers for Clipboard Paste
+async function handlePaste(btn) {
+    event.stopPropagation();
+    const input = btn.closest('.input-wrapper').querySelector('input');
+    try {
+        const text = await navigator.clipboard.readText();
+        input.value = text;
+        btn.textContent = "DONE";
+        setTimeout(() => btn.textContent = "PASTE", 1000);
+    } catch (err) {
+        alert("Please allow clipboard permissions in your browser!");
+    }
+}
+
 function handleProcess(btn, platformName) {
     event.stopPropagation();
     const block = btn.closest('.downloader-block');
@@ -204,20 +181,17 @@ function handleProcess(btn, platformName) {
     const btnText = btn.querySelector('.btn-text');
     const platformData = platforms.find(p => p.name === platformName);
 
-    // Reset UI
     input.classList.remove('invalid');
     error.style.display = 'none';
     engineContainer.style.display = 'none';
     iframe.src = "about:blank";
 
-    // Validation
     if (!platformData.pattern.test(input.value)) {
         input.classList.add('invalid');
         error.style.display = 'block';
         return;
     }
 
-    // UI Loading State
     btn.disabled = true;
     spinner.style.display = 'block';
     btnText.textContent = 'Scanning...';
@@ -225,16 +199,10 @@ function handleProcess(btn, platformName) {
     setTimeout(() => {
         engineContainer.style.display = 'block';
         loadingOverlay.style.display = 'flex';
-        
-        // Load the external website
         iframe.src = platformData.engineUrl + encodeURIComponent(input.value);
-
-        // Reset Button
         btn.disabled = false;
         spinner.style.display = 'none';
         btnText.textContent = `Analyze & Download`;
-
-        // Hide overlay when iframe loads
         iframe.onload = () => {
             loadingOverlay.style.display = 'none';
         };
