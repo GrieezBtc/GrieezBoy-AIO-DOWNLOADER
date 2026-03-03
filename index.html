@@ -1,173 +1,246 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>GreeezBoy AIO DOWNLOADER</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8" />
+<title>GrieezBoy AIO Downloader</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <style>
-    * { box-sizing: border-box; font-family: Arial, sans-serif; }
-    body {
-      margin: 0;
-      background: #0f172a;
-      color: #e5e7eb;
-      display: flex;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 20px;
-    }
-    .room {
-      width: 100%;
-      max-width: 520px;
-      background: #020617;
-      border-radius: 14px;
-      padding: 20px;
-    }
-    h1 {
-      text-align: center;
-      font-size: 20px;
-      margin-bottom: 16px;
-    }
-    .platforms {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      margin-bottom: 15px;
-    }
-    .platforms button {
-      padding: 12px;
-      border-radius: 8px;
-      border: none;
-      background: #1e293b;
-      color: #fff;
-      cursor: pointer;
-      font-size: 14px;
-    }
-    .platforms button.active {
-      background: #2563eb;
-    }
-    input {
-      width: 100%;
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid #334155;
-      background: #020617;
-      color: #e5e7eb;
-      margin-top: 10px;
-    }
-    button.action {
-      margin-top: 10px;
-      width: 100%;
-      padding: 12px;
-      border-radius: 8px;
-      border: none;
-      background: #2563eb;
-      color: #fff;
-      cursor: pointer;
-    }
-    .hidden { display: none; }
-    .status {
-      margin-top: 12px;
-      font-size: 14px;
-      text-align: center;
-    }
-    .error { color: #f87171; }
-    .results {
-      margin-top: 15px;
-    }
-    .media-item {
-      border: 1px solid #334155;
-      border-radius: 8px;
-      padding: 10px;
-      margin-bottom: 10px;
-    }
-  </style>
+<style>
+:root {
+  --bg-body: #05070a;
+  --bg-room: #020617;
+  --text-primary: #f8fafc;
+  --border-dim: #1e293b;
+  --error: #ef4444;
+  
+  /* Brand Colors */
+  --color-instagram: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+  --color-facebook: #1877F2;
+  --color-youtube: #FF0000;
+  --color-tiktok: #fe2c55;
+  --color-twitter: #1DA1F2;
+  --color-threads: #ffffff;
+  --color-pinterest: #E60023;
+}
+
+* { box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
+
+body, html {
+  margin: 0; padding: 0; min-height: 100vh;
+  background: var(--bg-body); color: var(--text-primary);
+  display: flex; justify-content: center;
+}
+
+.room {
+  width: 100%; max-width: 650px; background: var(--bg-room);
+  padding: 40px 20px; min-height: 100vh;
+  border-left: 1px solid var(--border-dim); border-right: 1px solid var(--border-dim);
+}
+
+h1 { text-align: center; font-size: 22px; letter-spacing: 2px; margin-bottom: 40px; color: #94a3b8; }
+
+.media-list { display: flex; flex-direction: column; gap: 12px; }
+
+.downloader-block {
+  background: #0f172a; border: 1px solid var(--border-dim);
+  padding: 20px; border-radius: 4px; cursor: pointer;
+  transition: all 0.3s ease; position: relative;
+}
+
+.downloader-block.active { border-left: 6px solid var(--accent); }
+
+.block-header { display: flex; justify-content: space-between; align-items: center; }
+.block-title { font-weight: 700; font-size: 17px; text-transform: uppercase; }
+
+/* Dynamic Titles Color */
+[data-platform="Instagram"] { --accent: #dc2743; }
+[data-platform="Facebook"] { --accent: #1877F2; }
+[data-platform="YouTube"] { --accent: #FF0000; }
+[data-platform="TikTok"] { --accent: #fe2c55; }
+[data-platform="Twitter"] { --accent: #1DA1F2; }
+[data-platform="Threads"] { --accent: #ffffff; }
+[data-platform="Pinterest"] { --accent: #E60023; }
+
+.block-title { color: var(--accent); }
+
+.input-area { margin-top: 15px; display: none; padding-top: 15px; border-top: 1px solid #1e293b; }
+.downloader-block.active .input-area { display: block; }
+
+input {
+  width: 100%; padding: 14px; background: #000; border: 1px solid #334155;
+  color: white; border-radius: 4px; margin-bottom: 5px; outline: none;
+}
+
+input.invalid { border-color: var(--error) !important; }
+
+.error-msg { color: var(--error); font-size: 12px; margin-bottom: 10px; display: none; }
+
+/* --- BUTTON WITH SPINNER --- */
+.btn-analyze {
+  width: 100%; padding: 14px; color: white; border: none;
+  font-weight: 800; cursor: pointer; border-radius: 4px;
+  display: flex; justify-content: center; align-items: center; gap: 10px;
+}
+
+.spinner {
+  width: 16px; height: 16px; border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%; border-top-color: #fff;
+  animation: spin 0.8s linear infinite;
+  display: none;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Button Colors */
+[data-platform="Instagram"] .btn-analyze { background: var(--color-instagram); }
+[data-platform="Facebook"] .btn-analyze  { background: var(--color-facebook); }
+[data-platform="YouTube"] .btn-analyze   { background: var(--color-youtube); }
+[data-platform="TikTok"] .btn-analyze    { background: var(--color-tiktok); }
+[data-platform="Twitter"] .btn-analyze   { background: var(--color-twitter); }
+[data-platform="Threads"] .btn-analyze   { background: #444; }
+[data-platform="Pinterest"] .btn-analyze { background: var(--color-pinterest); }
+
+/* IFRAME ENGINE STYLING */
+.engine-container {
+    margin-top: 15px;
+    width: 100%;
+    height: 400px;
+    background: #000;
+    border: 1px solid #334155;
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+    display: none;
+    animation: slideIn 0.4s ease;
+}
+
+iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    position: relative;
+    z-index: 1;
+}
+
+/* LOADING OVERLAY */
+.loading-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #64748b;
+    font-size: 14px;
+    z-index: 2;
+}
+
+@keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
 </head>
-
 <body>
-  <div class="room">
-    <h1>All Media Downloader</h1>
 
-    <!-- PLATFORM SELECTOR -->
-    <div class="platforms">
-      <button data-platform="instagram">Instagram</button>
-      <button data-platform="facebook">Facebook</button>
-      <button data-platform="tiktok">TikTok</button>
-      <button data-platform="twitter">Twitter</button>
-    </div>
+<div class="room">
+  <h1>GrieezBoy AIO Downloader</h1>
 
-    <!-- INPUT ZONE -->
-    <input id="mediaUrl" class="hidden" placeholder="" />
-    <button id="analyzeBtn" class="action hidden">Analyze</button>
+  <div class="media-list"></div>
+</div>
 
-    <!-- STATUS -->
-    <div id="status" class="status hidden"></div>
+<script>
+/** * PASTE YOUR EXTERNAL DOWNLOADER LINKS BELOW 
+ * Format: 'https://your-other-site.com/download?url='
+ */
+const platforms = [
+    { name: 'Instagram', pattern: /instagram\.com/i, engineUrl: 'https://YOUR_INSTAGRAM_ENGINE_URL.com?url=' },
+    { name: 'Facebook', pattern: /facebook\.com|fb\.watch/i, engineUrl: 'https://YOUR_FACEBOOK_ENGINE_URL.com?url=' },
+    { name: 'YouTube', pattern: /youtube\.com|youtu\.be/i, engineUrl: 'https://eliteprotech-apis.zone.id/yt?url=' },
+    { name: 'TikTok', pattern: /tiktok\.com/i, engineUrl: 'https://YOUR_TIKTOK_ENGINE_URL.com?url=' },
+    { name: 'Twitter', pattern: /twitter\.com|x\.com/i, engineUrl: 'https://YOUR_X_ENGINE_URL.com?url=' },
+    { name: 'Threads', pattern: /threads\.net/i, engineUrl: 'https://YOUR_THREADS_ENGINE_URL.com?url=' },
+    { name: 'Pinterest', pattern: /pinterest\.com|pin\.it/i, engineUrl: 'https://YOUR_PINTEREST_ENGINE_URL.com?url=' }
+];
 
-    <!-- RESULTS -->
-    <div id="results" class="results hidden"></div>
-  </div>
+const listContainer = document.querySelector('.media-list');
 
-  <script>
-    let activePlatform = null;
-
-    const platformButtons = document.querySelectorAll(".platforms button");
-    const input = document.getElementById("mediaUrl");
-    const analyzeBtn = document.getElementById("analyzeBtn");
-    const statusBox = document.getElementById("status");
-    const results = document.getElementById("results");
-
-    platformButtons.forEach(btn => {
-      btn.onclick = () => {
-        platformButtons.forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-
-        activePlatform = btn.dataset.platform;
-
-        input.classList.remove("hidden");
-        analyzeBtn.classList.remove("hidden");
-        results.classList.add("hidden");
-        statusBox.classList.add("hidden");
-
-        input.value = "";
-        input.placeholder = `Paste ${activePlatform} link here`;
-      };
-    });
-
-    analyzeBtn.onclick = async () => {
-      const url = input.value.trim();
-      if (!url || !activePlatform) return;
-
-      statusBox.textContent = "Analyzing media…";
-      statusBox.classList.remove("hidden");
-      results.classList.add("hidden");
-
-      // MOCK — backend integration comes later
-      await new Promise(r => setTimeout(r, 1200));
-
-      statusBox.classList.add("hidden");
-      results.innerHTML = "";
-      results.classList.remove("hidden");
-
-      const mockMedia = [
-        { id: "m1", type: "video", format: "mp4" }
-      ];
-
-      mockMedia.forEach(m => {
-        const div = document.createElement("div");
-        div.className = "media-item";
-        div.innerHTML = `
-          <div>Type: ${m.type}</div>
-          <div>Format: ${m.format}</div>
-          <button class="action" onclick="download('${m.id}')">Download</button>
-        `;
-        results.appendChild(div);
-      });
+platforms.forEach(p => {
+    const block = document.createElement('div');
+    block.className = 'downloader-block';
+    block.dataset.platform = p.name;
+    block.innerHTML = `
+        <div class="block-header">
+            <span class="block-title">${p.name}</span>
+            <small>Input Your Link Here</small>
+        </div>
+        <div class="input-area">
+            <input type="text" placeholder="Paste ${p.name} link here..." onclick="event.stopPropagation()">
+            <div class="error-msg">Please enter a valid ${p.name} URL</div>
+            <button class="btn-analyze" onclick="handleProcess(this, '${p.name}')">
+                <div class="spinner"></div>
+                <span class="btn-text">Analyze & Download</span>
+            </button>
+            <div class="engine-container">
+                <div class="loading-overlay">Loading...</div>
+                <iframe src="about:blank"></iframe>
+            </div>
+        </div>
+    `;
+    
+    block.onclick = () => {
+        document.querySelectorAll('.downloader-block').forEach(b => b.classList.remove('active'));
+        block.classList.add('active');
     };
+    
+    listContainer.appendChild(block);
+});
 
-    function download(id) {
-      alert(`Download ${id} from ${activePlatform}`);
-      // Future: GET /download/{platform}/{id}
+function handleProcess(btn, platformName) {
+    event.stopPropagation();
+    const block = btn.closest('.downloader-block');
+    const input = block.querySelector('input');
+    const error = block.querySelector('.error-msg');
+    const engineContainer = block.querySelector('.engine-container');
+    const iframe = block.querySelector('iframe');
+    const loadingOverlay = block.querySelector('.loading-overlay');
+    const spinner = btn.querySelector('.spinner');
+    const btnText = btn.querySelector('.btn-text');
+    const platformData = platforms.find(p => p.name === platformName);
+
+    // Reset UI
+    input.classList.remove('invalid');
+    error.style.display = 'none';
+    engineContainer.style.display = 'none';
+    iframe.src = "about:blank";
+
+    // Validation
+    if (!platformData.pattern.test(input.value)) {
+        input.classList.add('invalid');
+        error.style.display = 'block';
+        return;
     }
-  </script>
+
+    // UI Loading State
+    btn.disabled = true;
+    spinner.style.display = 'block';
+    btnText.textContent = 'Verifying...';
+    
+    setTimeout(() => {
+        engineContainer.style.display = 'block';
+        loadingOverlay.style.display = 'flex';
+        
+        // Load the external website
+        iframe.src = platformData.engineUrl + encodeURIComponent(input.value);
+
+        // Reset Button
+        btn.disabled = false;
+        spinner.style.display = 'none';
+        btnText.textContent = `Analyze & Download`;
+
+        // Hide overlay when iframe loads
+        iframe.onload = () => {
+            loadingOverlay.style.display = 'none';
+        };
+    }, 500);
+}
+</script>
+
 </body>
 </html>
