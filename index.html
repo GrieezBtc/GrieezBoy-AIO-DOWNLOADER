@@ -1,302 +1,304 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>GrieezBoy AIO Downloader</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GrieezBoy Downloader - Multi-Engine</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --bg: #05070a; --card-bg: #111827; --text-primary: #ffffff;
+            --text-secondary: #94a3b8; --accent: #2563eb; --border: rgba(255, 255, 255, 0.08);
+        }
 
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#05070a">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        [data-theme="light"] {
+            --bg: #f8fafc; --card-bg: #ffffff; --text-primary: #1e293b;
+            --text-secondary: #64748b; --border: rgba(0, 0, 0, 0.1);
+        }
 
-<style>
-:root {
-  /* Dark Mode (Default) */
-  --bg-body: #05070a;
-  --bg-room: #020617;
-  --text-primary: #f8fafc;
-  --text-dim: #94a3b8;
-  --border-dim: #1e293b;
-  --card-bg: #0f172a;
-  --input-bg: #000;
-  --error: #ef4444;
-  
-  --color-instagram: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-  --color-facebook: #1877F2;
-  --color-youtube: #FF0000;
-  --color-tiktok: #fe2c55;
-  --color-twitter: #1DA1F2;
-  --color-threads: #ffffff;
-  --color-pinterest: #E60023;
-}
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; transition: 0.3s; }
 
-/* Light Mode Theme Overrides */
-body.light-mode {
-  --bg-body: #f1f5f9;
-  --bg-room: #ffffff;
-  --text-primary: #0f172a;
-  --text-dim: #475569;
-  --border-dim: #e2e8f0;
-  --card-bg: #f8fafc;
-  --input-bg: #ffffff;
-}
+        body {
+            background-color: var(--bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
 
-/* Visibility Fix for Threads in Light Mode */
-body.light-mode [data-platform="Threads"] .block-title { color: #0f172a !important; }
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            position: sticky;
+            top: 0;
+            background: var(--bg);
+            z-index: 1000;
+        }
 
-* { box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; transition: background 0.3s ease, color 0.3s ease; }
-body, html { margin: 0; padding: 0; min-height: 100vh; background: var(--bg-body); color: var(--text-primary); display: flex; flex-direction: column; align-items: center; }
+        .nav-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--accent);
+            color: var(--text-primary);
+            padding: 10px 16px;
+            border-radius: 50px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
 
-/* TOP NAVIGATION BAR */
-.top-nav {
-    width: 100%; max-width: 650px; padding: 15px 20px;
-    display: flex; justify-content: space-between; align-items: center;
-    position: sticky; top: 0; z-index: 100;
-    background: var(--bg-body); border-bottom: 1px solid var(--border-dim);
-}
+        .btn-install { background: var(--accent); color: white; border: none; }
+        .btn-share { background: #10b981; color: white; border: none; }
 
-.nav-btn {
-    background: rgba(148, 163, 184, 0.1); border: 1px solid var(--border-dim);
-    color: var(--text-primary); padding: 8px 14px; border-radius: 20px;
-    font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px;
-}
-.install-btn { background: #3b82f6; color: white; border: none; }
-.share-btn { background: #10b981; color: white; border: none; display: none; } /* Hidden by default */
+        header {
+            text-align: center;
+            padding: 20px 20px 30px;
+        }
 
-.room { width: 100%; max-width: 650px; background: var(--bg-room); padding: 40px 20px; min-height: 100vh; border-left: 1px solid var(--border-dim); border-right: 1px solid var(--border-dim); display: flex; flex-direction: column; }
-h1 { text-align: center; font-size: 22px; letter-spacing: 2px; margin-bottom: 40px; color: var(--text-dim); }
-.media-list { display: flex; flex-direction: column; gap: 12px; flex-grow: 1; }
+        header h1 {
+            font-size: 1.6rem;
+            letter-spacing: 5px;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
 
-.downloader-block { background: var(--card-bg); border: 1px solid var(--border-dim); padding: 20px; border-radius: 4px; cursor: pointer; transition: all 0.3s ease; position: relative; margin-bottom: 5px; }
-.downloader-block.active { border-left: 6px solid var(--accent); }
-.block-header { display: flex; justify-content: space-between; align-items: center; }
-.block-title { font-weight: 700; font-size: 17px; text-transform: uppercase; }
+        .tagline {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            max-width: 280px;
+            margin: 0 auto;
+            line-height: 1.4;
+        }
 
-[data-platform="Instagram"] { --accent: #dc2743; }
-[data-platform="Facebook"] { --accent: #1877F2; }
-[data-platform="YouTube"] { --accent: #FF0000; }
-[data-platform="TikTok"] { --accent: #fe2c55; }
-[data-platform="Twitter"] { --accent: #1DA1F2; }
-[data-platform="Threads"] { --accent: #ffffff; }
-[data-platform="Pinterest"] { --accent: #E60023; }
-.block-title { color: var(--accent); }
+        .main-container {
+            flex: 1;
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
 
-.input-area { margin-top: 15px; display: none; padding-top: 15px; border-top: 1px solid var(--border-dim); }
-.downloader-block.active .input-area { display: block; }
+        .platform-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 20px;
+            margin-bottom: 12px;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
 
-.input-wrapper { position: relative; margin-bottom: 10px; }
-input { width: 100%; padding: 14px 80px 14px 14px; background: var(--input-bg); border: 1px solid var(--border-dim); color: var(--text-primary); border-radius: 4px; outline: none; }
-.btn-paste { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: var(--border-dim); color: var(--text-dim); border: none; padding: 6px 12px; border-radius: 4px; font-size: 11px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .platform-card:active { transform: scale(0.97); }
 
-input.invalid { border-color: var(--error) !important; }
-.error-msg { color: var(--error); font-size: 12px; margin-bottom: 10px; display: none; }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
 
-.btn-analyze { width: 100%; padding: 14px; color: white; border: none; font-weight: 800; cursor: pointer; border-radius: 4px; display: flex; justify-content: center; align-items: center; gap: 10px; }
-.spinner { width: 16px; height: 16px; border: 3px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top-color: #fff; animation: spin 0.8s linear infinite; display: none; }
-@keyframes spin { to { transform: rotate(360deg); } }
+        .platform-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 800;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
 
-[data-platform="Instagram"] .btn-analyze { background: var(--color-instagram); }
-[data-platform="Facebook"] .btn-analyze  { background: var(--color-facebook); }
-[data-platform="YouTube"] .btn-analyze   { background: var(--color-youtube); }
-[data-platform="TikTok"] .btn-analyze    { background: var(--color-tiktok); }
-[data-platform="Twitter"] .btn-analyze   { background: var(--color-twitter); }
-[data-platform="Threads"] .btn-analyze   { background: #444; }
-[data-platform="Pinterest"] .btn-analyze { background: var(--color-pinterest); }
+        .platform-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
 
-.engine-container { margin-top: 15px; width: 100%; height: 400px; background: #000; border: 1px solid var(--border-dim); border-radius: 4px; position: relative; overflow: hidden; display: none; }
-iframe { width: 100%; height: 100%; border: none; }
+        footer {
+            padding: 40px 20px;
+            text-align: center;
+            border-top: 1px solid var(--border);
+            margin-top: 30px;
+        }
 
-footer { width: 100%; padding: 30px 10px; margin-top: 40px; text-align: center; background: rgba(15, 23, 42, 0.5); border-top: 1px solid var(--border-dim); }
-.dev-label { font-size: 12px; color: var(--text-dim); letter-spacing: 2px; margin-bottom: 15px; display: block; }
-.social-links { display: flex; justify-content: center; gap: 20px; margin-bottom: 20px; }
-.social-links a { color: var(--text-dim); font-size: 22px; text-decoration: none; }
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-bottom: 20px;
+        }
 
-@media all and (display-mode: standalone) {
-    .install-btn { display: none !important; }
-    .share-btn { display: flex !important; }
-}
-</style>
+        .social-links a { color: var(--text-secondary); font-size: 20px; }
+
+        .copyright {
+            font-size: 9px;
+            color: var(--text-secondary);
+            letter-spacing: 1px;
+            font-weight: 700;
+        }
+    </style>
 </head>
-<body>
+<body data-theme="dark">
 
-<div class="top-nav">
-    <div id="actionBtns">
-        <button class="nav-btn install-btn" id="pwaBtn">
-            <i class="fa-solid fa-cloud-arrow-down"></i> Install App
+    <div class="top-nav">
+        <button id="action-btn" class="nav-btn btn-install">
+            <i class="fas fa-download"></i> <span>Install</span>
         </button>
-        <button class="nav-btn share-btn" id="shareBtn" onclick="shareApp()">
-            <i class="fa-solid fa-share-nodes"></i> Share App
+        
+        <button class="nav-btn" id="theme-toggle">
+            <i class="fas fa-moon"></i> <span>Dark</span>
         </button>
     </div>
-    <button class="nav-btn" onclick="toggleTheme()">
-        <i class="fa-solid fa-moon" id="themeIcon"></i> <span id="themeText">Dark Mode</span>
-    </button>
-</div>
 
-<div class="room">
-  <h1>GRIEEZBOY DOWNLOADER</h1>
-  <div class="media-list"></div>
+    <header>
+        <h1>GRIEEZBOY DOWNLOADER</h1>
+        <p class="tagline">Your All In One Professional downloading solutions for social media content</p>
+    </header>
 
-  <footer>
-      <span class="dev-label">CONNECT WITH DEVELOPER</span>
-      <div class="social-links">
-          <a href="https://wa.me/2348107461934" target="_blank" class="fa-brands fa-whatsapp"></a>
-          <a href="https://t.me/GrieezBoy" target="_blank" class="fa-brands fa-telegram"></a>
-          <a href="https://instagram.com/grieezboy" target="_blank" class="fa-brands fa-instagram"></a>
-          <a href="https://x.com/Muhammadja71663" target="_blank" class="fa-brands fa-x-twitter"></a>
-      </div>
-      <div class="copyright">
-          &copy; 2026 GRIEEZBOY ENGINE • ALL RIGHTS RESERVED
-      </div>
-  </footer>
-</div>
+    <div class="main-container">
+        <a href="facebook.html" class="platform-card">
+            <div class="card-header">
+                <div class="platform-title"><i class="fab fa-facebook" style="color: #1877F2;"></i> Facebook</div>
+                <i class="fas fa-chevron-right"></i>
+            </div>
+            <p class="platform-desc">Download HD videos and Reels from Facebook instantly with GrieezBoy processing.</p>
+        </a>
 
-<script>
-// --- PWA & ACTION LOGIC ---
-if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
+        <a href="https://instagram-six-iota.vercel.app/" class="platform-card">
+            <div class="card-header">
+                <div class="platform-title"><i class="fab fa-instagram" style="color: #E1306C;"></i> Instagram</div>
+                <i class="fas fa-chevron-right"></i>
+            </div>
+            <p class="platform-desc">Download photos, videos, and Reels. Maintain original quality with fast extraction.</p>
+        </a>
 
-let deferredPrompt;
-const installBtn = document.getElementById('pwaBtn');
-const shareBtn = document.getElementById('shareBtn');
+        <a href="https://youtube-downloader-ten-pied.vercel.app/" class="platform-card">
+            <div class="card-header">
+                <div class="platform-title"><i class="fab fa-youtube" style="color: #FF0000;"></i> YouTube</div>
+                <i class="fas fa-chevron-right"></i>
+            </div>
+            <p class="platform-desc">Convert YouTube videos to MP4 or MP3 formats in various quality options.</p>
+        </a>
 
-// Detect if already installed
-if (window.matchMedia('(display-mode: standalone)').matches) {
-    installBtn.style.display = 'none';
-    shareBtn.style.display = 'flex';
-}
+        <a href="https://tiktok-downloader-delta-lovat.vercel.app/" class="platform-card">
+            <div class="card-header">
+                <div class="platform-title"><i class="fab fa-tiktok" style="color: #69C9D0;"></i> TikTok</div>
+                <i class="fas fa-chevron-right"></i>
+            </div>
+            <p class="platform-desc">Download TikTok videos without watermark in HD quality. Save directly to your device.</p>
+        </a>
 
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-});
+        <a href="https://twitter-downloader-indol.vercel.app/" class="platform-card">
+            <div class="card-header">
+                <div class="platform-title"><i class="fa-brands fa-x-twitter"></i> Twitter (X)</div>
+                <i class="fas fa-chevron-right"></i>
+            </div>
+            <p class="platform-desc">Save high-definition videos and GIFs from X instantly using the fixed GrieezBoy Engine.</p>
+        </a>
 
-installBtn.addEventListener('click', async () => {
-    if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
+        <a href="https://thread-downloader-beryl.vercel.app/" class="platform-card">
+            <div class="card-header">
+                <div class="platform-title"><i class="fa-brands fa-threads"></i> Threads</div>
+                <i class="fas fa-chevron-right"></i>
+            </div>
+            <p class="platform-desc">Download videos and images from Threads. Preserve original resolution offline.</p>
+        </a>
+
+        <a href="https://pinterest-seven-ashy.vercel.app/" class="platform-card">
+            <div class="card-header">
+                <div class="platform-title"><i class="fab fa-pinterest" style="color: #E60023;"></i> Pinterest</div>
+                <i class="fas fa-chevron-right"></i>
+            </div>
+            <p class="platform-desc">Download your favorite Pinterest videos and high-res pins for offline viewing.</p>
+        </a>
+    </div>
+
+    <footer>
+        <div class="social-links">
+            <a href="https://wa.me/2348107461934"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://t.me/GrieezBoy"><i class="fab fa-telegram"></i></a>
+            <a href="https://instagram.com/grieezboy"><i class="fab fa-instagram"></i></a>
+            <a href="https://x.com/Muhammadja71663"><i class="fa-brands fa-x-twitter"></i></a>
+        </div>
+        <div class="copyright">© 2026 GRIEEZBOY DOWNLOADER • ALL RIGHTS RESERVED</div>
+    </footer>
+
+    <script>
+        // Theme Logic
+        const body = document.body;
+        const themeBtn = document.getElementById('theme-toggle');
+        const themeText = themeBtn.querySelector('span');
+        const themeIcon = themeBtn.querySelector('i');
+
+        themeBtn.addEventListener('click', () => {
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            themeText.innerText = isDark ? "Light" : "Dark";
+            themeIcon.className = isDark ? "fas fa-sun" : "fas fa-moon";
+        });
+
+        // Install & Share Logic
+        let deferredPrompt;
+        const actionBtn = document.getElementById('action-btn');
+        const actionText = actionBtn.querySelector('span');
+        const actionIcon = actionBtn.querySelector('i');
+        
+        // YOUR CUSTOM SHARE TEXT AND LINK
+        const shareText = "Check out this amazing All-In-One media downloader!";
+        const shareUrl = "https://grieezboy-downloader.zone.id/";
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            updateToInstallState();
+        });
+
+        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+            updateToShareState();
+        }
+
+        actionBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') updateToShareState();
+                deferredPrompt = null;
+            } else {
+                // INTEGRATED SHARE HANDLER
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'GrieezBoy Downloader,
+                        text: shareText,
+                        url: shareUrl
+                    }).catch(console.error);
+                } else {
+                    navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
+                    alert("Share link copied to clipboard!");
+                }
+            }
+        });
+
+        function updateToInstallState() {
+            actionBtn.className = "nav-btn btn-install";
+            actionText.innerText = "Install";
+            actionIcon.className = "fas fa-download";
+        }
+
+        function updateToShareState() {
+            actionBtn.className = "nav-btn btn-share";
+            actionText.innerText = "Share";
+            actionIcon.className = "fas fa-share-alt";
             deferredPrompt = null;
-            installBtn.style.display = 'none';
-            shareBtn.style.display = 'flex';
         }
-    } else {
-        alert("To install: Tap your browser menu and select 'Add to Home Screen'");
-    }
-});
-
-window.addEventListener('appinstalled', () => {
-    installBtn.style.display = 'none';
-    shareBtn.style.display = 'flex';
-});
-
-// Native Share Function
-async function shareApp() {
-    if (navigator.share) {
-        try {
-            await navigator.share({
-                title: 'GrieezBoy AIO Downloader',
-                text: 'Check out this amazing All-In-One media downloader!',
-                url: window.location.href
-            });
-        } catch (err) { console.log("Share cancelled"); }
-    } else {
-        alert("Copy this link to share: " + window.location.href);
-    }
-}
-
-// --- PLATFORM ENGINE ---
-const platforms = [
-    { name: 'Instagram', pattern: /instagram\.com|instagr\.am/i, engineUrl: 'https://instagram-six-iota.vercel.app/?url=' },
-    { name: 'Facebook', pattern: /facebook\.com|fb\.watch|fb\.com/i, engineUrl: 'https://facebook-cyan-seven.vercel.app/?url=' },
-    { name: 'YouTube', pattern: /youtube\.com|youtu\.be/i, engineUrl: 'https://youtube-downloader-ten-pied.vercel.app/?url=' },
-    { name: 'TikTok', pattern: /tiktok\.com/i, engineUrl: 'https://grieezboy-tiktok.netlify.app/?url=' },
-    { name: 'Twitter', pattern: /twitter\.com|x\.com/i, engineUrl: 'https://twitter-downloader-indol.vercel.app/?url=' },
-    { name: 'Threads', pattern: /threads\.(net|com)/i, engineUrl: 'https://thread-downloader-beryl.vercel.app/?url=' },
-    { name: 'Pinterest', pattern: /pinterest\.com|pin\.it/i, engineUrl: 'https://pinterest-seven-ashy.vercel.app/?url=' }
-];
-
-const listContainer = document.querySelector('.media-list');
-
-platforms.forEach(p => {
-    const block = document.createElement('div');
-    block.className = 'downloader-block';
-    block.dataset.platform = p.name;
-    block.innerHTML = `
-        <div class="block-header">
-            <span class="block-title">${p.name}</span>
-            <small style="color: #475569;">Tap to open</small>
-        </div>
-        <div class="input-area">
-            <div class="input-wrapper">
-                <input type="text" placeholder="Paste ${p.name} link here..." onclick="event.stopPropagation()">
-                <button class="btn-paste" onclick="handlePaste(this)">PASTE</button>
-            </div>
-            <div class="error-msg" style="display:none;">Please enter a valid ${p.name} URL</div>
-            <button class="btn-analyze" onclick="handleProcess(this, '${p.name}')">
-                <div class="spinner"></div>
-                <span class="btn-text">Analyze & Download</span>
-            </button>
-            <div class="engine-container">
-                <div class="loading-overlay">Loading GrieezBoy Engine...</div>
-                <iframe src="about:blank"></iframe>
-            </div>
-        </div>
-    `;
-    
-    block.onclick = (e) => {
-        if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON') {
-            const isActive = block.classList.contains('active');
-            document.querySelectorAll('.downloader-block').forEach(b => b.classList.remove('active'));
-            if(!isActive) block.classList.add('active');
-        }
-    };
-    listContainer.appendChild(block);
-});
-
-function toggleTheme() {
-    const body = document.body;
-    const icon = document.getElementById('themeIcon');
-    const text = document.getElementById('themeText');
-    body.classList.toggle('light-mode');
-    const isLight = body.classList.contains('light-mode');
-    icon.className = isLight ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
-    text.innerText = isLight ? 'Light Mode' : 'Dark Mode';
-}
-
-async function handlePaste(btn) {
-    event.stopPropagation();
-    const input = btn.closest('.input-wrapper').querySelector('input');
-    try {
-        input.value = await navigator.clipboard.readText();
-    } catch (err) { alert("Clipboard access denied"); }
-}
-
-function handleProcess(btn, platformName) {
-    event.stopPropagation();
-    const block = btn.closest('.downloader-block');
-    const input = block.querySelector('input');
-    const container = block.querySelector('.engine-container');
-    const iframe = block.querySelector('iframe');
-    const spinner = btn.querySelector('.spinner');
-    const pData = platforms.find(p => p.name === platformName);
-
-    if (!pData.pattern.test(input.value)) {
-        input.classList.add('invalid');
-        return;
-    }
-
-    spinner.style.display = 'block';
-    btn.disabled = true;
-    
-    setTimeout(() => {
-        container.style.display = 'block';
-        iframe.src = pData.engineUrl + encodeURIComponent(input.value);
-        btn.disabled = false;
-        spinner.style.display = 'none';
-    }, 600);
-}
-</script>
+    </script>
 </body>
 </html>
