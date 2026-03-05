@@ -165,7 +165,7 @@
     </header>
 
     <div class="main-container">
-        <a href="https://facebook-cyan-seven.vercel.app/" class="platform-card">
+        <a href="https://facebook-cyan-seven.vercel.app/" class="platform-card" target="_self">
             <div class="card-header">
                 <div class="platform-title"><i class="fab fa-facebook" style="color: #1877F2;"></i> Facebook</div>
                 <i class="fas fa-chevron-right"></i>
@@ -173,7 +173,7 @@
             <p class="platform-desc">Download HD videos and Reels from Facebook instantly with GrieezBoy processing.</p>
         </a>
 
-        <a href="https://instagram-six-iota.vercel.app/" class="platform-card">
+        <a href="https://instagram-six-iota.vercel.app/" class="platform-card" target="_self">
             <div class="card-header">
                 <div class="platform-title"><i class="fab fa-instagram" style="color: #E1306C;"></i> Instagram</div>
                 <i class="fas fa-chevron-right"></i>
@@ -181,7 +181,7 @@
             <p class="platform-desc">Download photos, videos, and Reels. Maintain original quality with fast extraction.</p>
         </a>
 
-        <a href="https://youtube-downloader-ten-pied.vercel.app/" class="platform-card">
+        <a href="https://youtube-downloader-ten-pied.vercel.app/" class="platform-card" target="_self">
             <div class="card-header">
                 <div class="platform-title"><i class="fab fa-youtube" style="color: #FF0000;"></i> YouTube</div>
                 <i class="fas fa-chevron-right"></i>
@@ -189,7 +189,7 @@
             <p class="platform-desc">Convert YouTube videos to MP4 or MP3 formats in various quality options.</p>
         </a>
 
-        <a href="https://tiktok-downloader-delta-lovat.vercel.app/" class="platform-card">
+        <a href="https://tiktok-downloader-delta-lovat.vercel.app/" class="platform-card" target="_self">
             <div class="card-header">
                 <div class="platform-title"><i class="fab fa-tiktok" style="color: #69C9D0;"></i> TikTok</div>
                 <i class="fas fa-chevron-right"></i>
@@ -197,7 +197,7 @@
             <p class="platform-desc">Download TikTok videos without watermark in HD quality. Save directly to your device.</p>
         </a>
 
-        <a href="https://twitter-downloader-indol.vercel.app/" class="platform-card">
+        <a href="https://twitter-downloader-indol.vercel.app/" class="platform-card" target="_self">
             <div class="card-header">
                 <div class="platform-title"><i class="fa-brands fa-x-twitter"></i> Twitter (X)</div>
                 <i class="fas fa-chevron-right"></i>
@@ -205,7 +205,7 @@
             <p class="platform-desc">Save high-definition videos and GIFs from X instantly using the fixed GrieezBoy Engine.</p>
         </a>
 
-        <a href="https://thread-downloader-beryl.vercel.app/" class="platform-card">
+        <a href="https://thread-downloader-beryl.vercel.app/" class="platform-card" target="_self">
             <div class="card-header">
                 <div class="platform-title"><i class="fa-brands fa-threads"></i> Threads</div>
                 <i class="fas fa-chevron-right"></i>
@@ -213,7 +213,7 @@
             <p class="platform-desc">Download videos and images from Threads. Preserve original resolution offline.</p>
         </a>
 
-        <a href="https://pinterest-seven-ashy.vercel.app/" class="platform-card">
+        <a href="https://pinterest-seven-ashy.vercel.app/" class="platform-card" target="_self">
             <div class="card-header">
                 <div class="platform-title"><i class="fab fa-pinterest" style="color: #E60023;"></i> Pinterest</div>
                 <i class="fas fa-chevron-right"></i>
@@ -233,7 +233,6 @@
     </footer>
 
     <script>
-        // 1. Theme Logic
         const body = document.body;
         const themeBtn = document.getElementById('theme-toggle');
         const themeText = themeBtn.querySelector('span');
@@ -246,7 +245,6 @@
             themeIcon.className = isDark ? "fas fa-sun" : "fas fa-moon";
         });
 
-        // 2. Install & Share Logic
         let deferredPrompt;
         const actionBtn = document.getElementById('action-btn');
         const actionText = actionBtn.querySelector('span');
@@ -261,7 +259,6 @@
             updateToInstallState();
         });
 
-        // Detect if already installed
         if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
             updateToShareState();
         }
@@ -299,7 +296,6 @@
             deferredPrompt = null;
         }
 
-        // 3. Service Worker Registration for PWA Stability
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js').catch(err => console.log("SW registration failed: ", err));
