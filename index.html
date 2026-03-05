@@ -233,7 +233,7 @@
     </footer>
 
     <script>
-        // Theme Logic
+        // 1. Theme Logic
         const body = document.body;
         const themeBtn = document.getElementById('theme-toggle');
         const themeText = themeBtn.querySelector('span');
@@ -246,13 +246,12 @@
             themeIcon.className = isDark ? "fas fa-sun" : "fas fa-moon";
         });
 
-        // Install & Share Logic
+        // 2. Install & Share Logic
         let deferredPrompt;
         const actionBtn = document.getElementById('action-btn');
         const actionText = actionBtn.querySelector('span');
         const actionIcon = actionBtn.querySelector('i');
         
-        // YOUR CUSTOM SHARE TEXT AND LINK
         const shareText = "Check out this amazing All-In-One media downloader!";
         const shareUrl = "https://grieezboy-downloader.zone.id/";
 
@@ -262,6 +261,7 @@
             updateToInstallState();
         });
 
+        // Detect if already installed
         if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
             updateToShareState();
         }
@@ -273,10 +273,9 @@
                 if (outcome === 'accepted') updateToShareState();
                 deferredPrompt = null;
             } else {
-                // INTEGRATED SHARE HANDLER
                 if (navigator.share) {
                     navigator.share({
-                        title: 'GrieezBoy Downloader,
+                        title: 'GrieezBoy Downloader',
                         text: shareText,
                         url: shareUrl
                     }).catch(console.error);
@@ -298,6 +297,13 @@
             actionText.innerText = "Share";
             actionIcon.className = "fas fa-share-alt";
             deferredPrompt = null;
+        }
+
+        // 3. Service Worker Registration for PWA Stability
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(err => console.log("SW registration failed: ", err));
+            });
         }
     </script>
 </body>
