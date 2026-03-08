@@ -101,6 +101,24 @@
 
         .platform-card:active { transform: scale(0.97); }
 
+        /* Coming Soon Card Styles */
+        .platform-card.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .badge-soon {
+            background: #FF0000;
+            color: #ffffff;
+            font-size: 9px;
+            font-weight: 900;
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
         .card-header {
             display: flex;
             justify-content: space-between;
@@ -153,7 +171,7 @@
         <button id="action-btn" class="nav-btn btn-install">
             <i class="fas fa-download"></i> <span>Install</span>
         </button>
-        
+
         <button class="nav-btn" id="theme-toggle">
             <i class="fas fa-moon"></i> <span>Dark</span>
         </button>
@@ -188,6 +206,14 @@
             </div>
             <p class="platform-desc">Convert YouTube videos to MP4 or MP3 formats in various quality options.</p>
         </a>
+
+        <div class="platform-card disabled">
+            <div class="card-header">
+                <div class="platform-title"><i class="fas fa-music" style="color: #FF0000;"></i> YouTube Music</div>
+                <span class="badge-soon">Coming Soon</span>
+            </div>
+            <p class="platform-desc">Download high-bitrate audio tracks and full playlists directly to your device.</p>
+        </div>
 
         <a href="https://tiktok-downloader-delta-lovat.vercel.app/" class="platform-card" target="_self">
             <div class="card-header">
@@ -249,7 +275,7 @@
         const actionBtn = document.getElementById('action-btn');
         const actionText = actionBtn.querySelector('span');
         const actionIcon = actionBtn.querySelector('i');
-        
+
         const shareText = "Check out this amazing All-In-One media downloader!";
         const shareUrl = "https://grieezboy-downloader.zone.id/";
 
