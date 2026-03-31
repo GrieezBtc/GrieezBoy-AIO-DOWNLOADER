@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
+    <title>Facebook Downloader - GrieezBoy</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --bg: #05070a; --card-bg: #111827; --text-primary: #ffffff;
+            --text-secondary: #94a3b8; --accent: #1877F2; --border: rgba(255, 255, 255, 0.08);
+            --input-bg: #1e293b;
+        }
+        [data-theme="light"] {
+            --bg: #f8fafc; --card-bg: #ffffff; --text-primary: #1e293b;
+            --text-secondary: #64748b; --border: rgba(0, 0, 0, 0.1);
+            --input-bg: #e2e8f0;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; transition: 0.3s; }
+        body { background-color: var(--bg); color: var(--text-primary); min-height: 100vh; display: flex; flex-direction: column; }
+        .top-nav { display: flex; justify-content: space-between; align-items: center; padding: 20px; max-width: 500px; margin: 0 auto; width: 100%; position: sticky; top: 0; background: var(--bg); z-index: 100; }
+        .back-btn { text-decoration: none; color: var(--accent); font-weight: 800; font-size: 13px; display: flex; align-items: center; gap: 8px; text-transform: uppercase; }
+        .theme-btn { background: var(--card-bg); border: 1px solid var(--accent); color: var(--text-primary); padding: 8px 15px; border-radius: 50px; font-size: 11px; font-weight: 700; cursor: pointer; }
+        .container { flex: 1; width: 100%; max-width: 480px; margin: 0 auto; padding: 0 20px; text-align: center; }
+        .header-icon { font-size: 50px; color: var(--accent); margin-bottom: 10px; }
+        h1 { font-size: 24px; margin-bottom: 10px; }
+        .description { color: var(--text-secondary); font-size: 14px; margin-bottom: 30px; line-height: 1.5; }
+        .input-card { background: var(--card-bg); border-radius: 18px; padding: 25px; border: 1px solid var(--border); margin-bottom: 40px; }
+        .input-field { width: 100%; padding: 16px; background: var(--input-bg); border: 1px solid var(--border); border-radius: 12px; color: var(--text-primary); margin-bottom: 15px; outline: none; }
+        #loader { display: none; margin: 20px 0; }
+        .spinner { width: 30px; height: 30px; border: 3px solid var(--accent); border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .result-card { display: none; background: var(--card-bg); border-radius: 14px; padding: 15px; border: 1px solid var(--accent); margin-top: 20px; text-align: left; }
+        .thumb { width: 100%; border-radius: 8px; margin-bottom: 15px; display: block; aspect-ratio: 16/9; object-fit: cover; background: #000; }
+        .btn-action { width: 100%; background: var(--accent); color: white; border: none; padding: 16px; border-radius: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; margin-bottom: 10px; font-size: 13px; text-transform: uppercase; }
+        .btn-copy { background: #1e293b; font-size: 11px; border: 1px solid var(--border); }
+        .dl-hint { font-size: 11px; color: var(--text-secondary); text-align: center; margin-top: -5px; margin-bottom: 15px; line-height: 1.4; }
+        .how-to { text-align: left; margin: 30px 0 50px 0; padding: 0 10px; }
+        .how-to h3 { font-size: 16px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; color: var(--text-primary); }
+        .how-to ol { padding-left: 20px; color: var(--text-secondary); font-size: 14px; }
+        .how-to li { margin-bottom: 12px; }
+        footer { padding: 40px 20px; text-align: center; border-top: 1px solid var(--border); background: var(--bg); }
+        .socials { display: flex; justify-content: center; gap: 25px; margin-bottom: 20px; }
+        .socials a { color: var(--text-secondary); font-size: 20px; text-decoration: none; }
+        .copyright { font-size: 10px; color: var(--text-secondary); letter-spacing: 1px; font-weight: 700; }
+    </style>
+</head>
+<body data-theme="dark">
+
+    <div class="top-nav">
+        <a href="https://grieezboy-downloader.zone.id/" class="back-btn" target="_self">
+            <i class="fas fa-arrow-left"></i> Back to List
+        </a>
+        <button class="theme-btn" id="theme-toggle"><i class="fas fa-moon"></i> <span>Light Mode</span></button>
+    </div>
+
+    <div class="container">
+        <div class="header-icon"><i class="fab fa-facebook"></i></div>
+        <h1>Facebook Downloader</h1>
+        <p class="description">Download high-quality videos from Facebook with ease. Powered by the GrieezBoy High-Speed Engine.</p>
+
+        <div class="input-card">
+            <input type="text" id="fb-url" class="input-field" placeholder="Paste Facebook video URL here">
+            <button class="btn-action" id="fetch-btn" onclick="initDownload()">
+                <i class="fas fa-bolt"></i> Fetch Video
+            </button>
+
+            <div id="loader">
+                <div class="spinner"></div>
+                <p style="margin-top:10px; font-size:12px; color:var(--accent)">GRIEEZBOY IS ANALYZING VIDEO...</p>
+            </div>
+
+            <div id="result" class="result-card">
+                <img id="thumb" class="thumb" src="" alt="Preview">
+                <a id="dl-trigger" class="btn-action" target="_blank" rel="noopener noreferrer">
+                    <i class="fas fa-download"></i> TAP TO DOWNLOAD NOW
+                </a>
+                <p class="dl-hint"><b>Tip:</b> If the video plays instead of downloading, tap the <b>three dots (⋮)</b> on the video player and select <b>Download</b>.</p>
+                <button id="copy-trigger" class="btn-action btn-copy">
+                    <i class="fas fa-copy"></i> COPY DIRECT LINK
+                </button>
+            </div>
+        </div>
+
+        <div class="how-to">
+            <h3><i class="fas fa-info-circle"></i> How to use:</h3>
+            <ol>
+                <li>Open Facebook and find the video you want to download.</li>
+                <li>Copy the video URL from your browser's address bar or share menu.</li>
+                <li>Paste the URL in the input field above.</li>
+                <li>Click "Fetch Video" to generate the download preview.</li>
+                <li>Click the download button to save the file via the GrieezBoy Engine.</li>
+            </ol>
+        </div>
+    </div>
+
+    <footer>
+        <div class="socials">
+            <a href="https://wa.me/2348107461934"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://t.me/GrieezBoy"><i class="fab fa-telegram"></i></a>
+            <a href="https://instagram.com/grieezboy"><i class="fab fa-instagram"></i></a>
+            <a href="https://x.com/Muhammadja71663"><i class="fa-brands fa-x-twitter"></i></a>
+        </div>
+        <div class="copyright">© 2026 GRIEEZBOY ENGINE • ALL RIGHTS RESERVED</div>
+    </footer>
+
+    <script>
+        async function initDownload() {
+            const fbUrl = document.getElementById('fb-url').value.trim();
+            if (!fbUrl) { alert("Please paste a Facebook video URL!"); return; }
+
+            const loader = document.getElementById('loader');
+            const resultBox = document.getElementById('result');
+            loader.style.display = "block";
+            resultBox.style.display = "none";
+
+            const apiTarget = `https://eliteprotech-apis.zone.id/facebook?url=${encodeURIComponent(fbUrl)}`;
+
+            try {
+                const response = await fetch(apiTarget);
+                const data = await response.json();
+
+                if (!data || data.success !== true) { throw new Error("Video not found"); }
+
+                const videoLink = data.video;
+                const thumbnail = data.thumbnail;
+                if (!videoLink) { throw new Error("No video returned"); }
+
+                document.getElementById('thumb').src = thumbnail;
+                const dlBtn = document.getElementById('dl-trigger');
+                const copyBtn = document.getElementById('copy-trigger');
+
+                // Apply the direct link
+                dlBtn.href = videoLink;
+
+                copyBtn.onclick = () => {
+                    navigator.clipboard.writeText(videoLink);
+                    copyBtn.innerHTML = "COPIED!";
+                    setTimeout(() => { copyBtn.innerHTML = '<i class="fas fa-copy"></i> COPY DIRECT LINK'; }, 2000);
+                };
+
+                loader.style.display = "none";
+                resultBox.style.display = "block";
+            } catch (error) {
+                console.error(error);
+                loader.style.display = "none";
+                alert("Video not found. Make sure the Facebook post is public.");
+            }
+        }
+
+        const themeBtn = document.getElementById('theme-toggle');
+        themeBtn.addEventListener('click', () => {
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            document.body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            themeBtn.querySelector('span').innerText = isDark ? "Dark Mode" : "Light Mode";
+            themeBtn.querySelector('i').className = isDark ? "fas fa-sun" : "fas fa-moon";
+        });
+    </script>
+</body>
+</html>
