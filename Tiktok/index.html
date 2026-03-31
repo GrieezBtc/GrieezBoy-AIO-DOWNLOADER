@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
+    <title>TikTok Downloader - GrieezBoy</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --bg: #05070a; --card-bg: #111827; --text-primary: #ffffff;
+            --text-secondary: #94a3b8; --accent: #ff0050; --accent2: #00f2ea;
+            --border: rgba(255, 255, 255, 0.08); --input-bg: #1e293b;
+        }
+
+        [data-theme="light"] {
+            --bg: #f8fafc; --card-bg: #ffffff; --text-primary: #1e293b;
+            --text-secondary: #64748b; --border: rgba(0, 0, 0, 0.1);
+            --input-bg: #e2e8f0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; transition: 0.3s; }
+        body { background-color: var(--bg); color: var(--text-primary); min-height: 100vh; display: flex; flex-direction: column; }
+
+        /* Sticky Navigation */
+        .top-nav { display: flex; justify-content: space-between; align-items: center; padding: 20px; max-width: 500px; margin: 0 auto; width: 100%; position: sticky; top: 0; background: var(--bg); z-index: 100; }
+
+        .back-btn { text-decoration: none; color: var(--accent); font-weight: 800; font-size: 13px; display: flex; align-items: center; gap: 8px; text-transform: uppercase; }
+        .theme-btn { background: var(--card-bg); border: 1px solid var(--accent); color: var(--text-primary); padding: 8px 15px; border-radius: 50px; font-size: 11px; font-weight: 700; cursor: pointer; }
+
+        .container { flex: 1; width: 100%; max-width: 480px; margin: 0 auto; padding: 0 20px; text-align: center; }
+        .header-icon { font-size: 50px; color: var(--accent); margin-bottom: 10px; filter: drop-shadow(0 0 5px var(--accent2)); }
+        h1 { font-size: 24px; margin-bottom: 10px; }
+        .description { color: var(--text-secondary); font-size: 14px; margin-bottom: 30px; line-height: 1.5; }
+
+        .input-card { background: var(--card-bg); border-radius: 18px; padding: 25px; border: 1px solid var(--border); margin-bottom: 40px; }
+        .input-field { width: 100%; padding: 16px; background: var(--input-bg); border: 1px solid var(--border); border-radius: 12px; color: var(--text-primary); margin-bottom: 15px; outline: none; }
+
+        #loader { display: none; margin: 20px 0; }
+        .spinner { width: 30px; height: 30px; border: 3px solid var(--accent); border-top-color: var(--accent2); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .result-card { display: none; background: var(--card-bg); border-radius: 14px; padding: 15px; border: 1px solid var(--border); margin-top: 20px; text-align: left; }
+        .thumb { width: 100%; border-radius: 8px; margin-bottom: 10px; display: block; aspect-ratio: 9/16; object-fit: cover; max-height: 300px; margin: 0 auto 15px; }
+        .video-title { font-size: 14px; font-weight: 700; margin-bottom: 15px; text-align: center; line-height: 1.4; }
+
+        .btn-action { width: 100%; color: white; border: none; padding: 16px; border-radius: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; margin-bottom: 10px; font-size: 13px; }
+        .btn-fetch { background: linear-gradient(45deg, var(--accent), var(--accent2)); }
+        .btn-hd { background: linear-gradient(45deg, var(--accent), #e91e63); }
+        .btn-mp3 { background: #374151; border: 1px solid #4b5563; }
+
+        .how-to { text-align: left; margin-bottom: 50px; padding: 0 10px; }
+        .how-to h3 { font-size: 16px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; color: var(--text-primary); }
+        .how-to ol { padding-left: 20px; color: var(--text-secondary); font-size: 14px; }
+        .how-to li { margin-bottom: 12px; }
+
+        footer { padding: 40px 20px; text-align: center; border-top: 1px solid var(--border); background: var(--bg); }
+        .socials { display: flex; justify-content: center; gap: 25px; margin-bottom: 20px; }
+        .socials a { color: var(--text-secondary); font-size: 20px; text-decoration: none; }
+        .copyright { font-size: 10px; color: var(--text-secondary); letter-spacing: 1px; font-weight: 700; }
+    </style>
+</head>
+<body data-theme="dark">
+
+    <div class="top-nav">
+        <a href="https://grieezboy-downloader.zone.id/" class="back-btn" target="_self">
+            <i class="fas fa-arrow-left"></i> Back to List
+        </a>
+        <button class="theme-btn" id="theme-toggle"><i class="fas fa-moon"></i> <span>Light Mode</span></button>
+    </div>
+
+    <div class="container">
+        <div class="header-icon"><i class="fab fa-tiktok"></i></div>
+        <h1>TikTok Downloader</h1>
+        <p class="description">Download TikTok videos without watermark (HD) and high-quality MP3 audio using GrieezBoy Engine.</p>
+
+        <div class="input-card">
+            <input type="text" id="tk-url" class="input-field" placeholder="Paste TikTok link here">
+            <button class="btn-action btn-fetch" onclick="initDownload()">
+                <i class="fas fa-bolt"></i> Fetch Media
+            </button>
+
+            <div id="loader">
+                <div class="spinner"></div>
+                <p id="status" style="margin-top:10px; font-size:12px; color:var(--accent2)">BYPASSING REGIONAL BLOCKS...</p>
+            </div>
+
+            <div id="result" class="result-card">
+                <img id="thumb" class="thumb" src="" alt="Preview">
+                <div id="video-title" class="video-title"></div>
+                <div id="links-container"></div>
+            </div>
+        </div>
+
+        <div class="how-to">
+            <h3><i class="fas fa-info-circle"></i> How to use:</h3>
+            <ol>
+                <li>Open TikTok and tap the 'Share' button on a video.</li>
+                <li>Copy the link and paste it into the box above.</li>
+                <li>Click "Fetch Media" and wait for GrieezBoy to bypass the watermark.</li>
+                <li>Choose "Download HD" to save the video without the TikTok logo.</li>
+            </ol>
+        </div>
+    </div>
+
+    <footer>
+        <div class="socials">
+            <a href="https://wa.me/2348107461934"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://t.me/GrieezBoy"><i class="fab fa-telegram"></i></a>
+            <a href="https://instagram.com/grieezboy"><i class="fab fa-instagram"></i></a>
+            <a href="https://x.com/Muhammadja71663"><i class="fa-brands fa-x-twitter"></i></a>
+        </div>
+        <div class="copyright">© 2026 GRIEEZBOY ENGINE • ALL RIGHTS RESERVED</div>
+    </footer>
+
+    <script>
+        const themeBtn = document.getElementById('theme-toggle');
+        themeBtn.addEventListener('click', () => {
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            document.body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            themeBtn.querySelector('span').innerText = isDark ? "Dark Mode" : "Light Mode";
+            themeBtn.querySelector('i').className = isDark ? "fas fa-sun" : "fas fa-moon";
+        });
+
+        async function initDownload() {
+            const tiktokUrl = document.getElementById('tk-url').value;
+            if (!tiktokUrl) return alert("Please paste a link!");
+
+            document.getElementById('loader').style.display = 'block';
+            document.getElementById('result').style.display = 'none';
+
+            const proxies = [
+                "https://api.allorigins.win/get?url=",
+                "https://corsproxy.io/?",
+                "https://api.codetabs.com/v1/proxy?quest="
+            ];
+
+            const apiBase = `https://eliteprotech-apis.zone.id/tiktok?url=${encodeURIComponent(tiktokUrl)}`;
+
+            for (let proxy of proxies) {
+                try {
+                    document.getElementById('status').innerText = "FETCHING DATA...";
+                    const response = await fetch(proxy + encodeURIComponent(apiBase));
+                    if (!response.ok) continue;
+
+                    let data = await response.json();
+                    if (data.contents) data = JSON.parse(data.contents);
+
+                    if (data.success || data.status === "success") {
+                        renderUI(data);
+                        return;
+                    }
+                } catch (err) {
+                    console.warn("Proxy fail, retrying...");
+                }
+            }
+            alert("GrieezBoy Engine: TikTok Server error. Please try again in a moment.");
+            document.getElementById('loader').style.display = 'none';
+        }
+
+        function renderUI(data) {
+            document.getElementById('thumb').src = data.thumbnail;
+            document.getElementById('video-title').innerText = data.title || "TikTok Media Ready";
+            const container = document.getElementById('links-container');
+            container.innerHTML = "";
+
+            if (data.mp4_hd || data.mp4) {
+                const videoLink = data.mp4_hd || data.mp4;
+                container.innerHTML += `
+                    <a href="${videoLink}" target="_blank" class="btn-action btn-hd">
+                        <i class="fas fa-video"></i> DOWNLOAD HD (NO LOGO)
+                    </a>`;
+            }
+
+            if (data.mp3) {
+                container.innerHTML += `
+                    <a href="${data.mp3}" target="_blank" class="btn-action btn-mp3">
+                        <i class="fas fa-music"></i> DOWNLOAD MP3 (AUDIO)
+                    </a>`;
+            }
+
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('result').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
