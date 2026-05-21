@@ -1,324 +1,198 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GrieezBoy Downloader - Multi-Engine</title>
-    <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <style>
-        :root {
-            --bg: #05070a; --card-bg: #111827; --text-primary: #ffffff;
-            --text-secondary: #94a3b8; --accent: #2563eb; --border: rgba(255, 255, 255, 0.08);
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GrieezBoy Downloader - Multi-Engine</title>
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root {
+    --bg: #05070a; --card-bg: #111827; --text-primary: #ffffff;
+    --text-secondary: #94a3b8; --accent: #2563eb; --border: rgba(255, 255, 255, 0.08);
+}
+[data-theme="light"] {
+    --bg: #f8fafc; --card-bg: #ffffff; --text-primary: #1e293b;
+    --text-secondary: #64748b; --border: rgba(0, 0, 0, 0.1);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; transition: 0.3s; }
+body { background-color: var(--bg); color: var(--text-primary); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
 
-        [data-theme="light"] {
-            --bg: #f8fafc; --card-bg: #ffffff; --text-primary: #1e293b;
-            --text-secondary: #64748b; --border: rgba(0, 0, 0, 0.1);
-        }
+.top-nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; position: sticky; top: 0; background: var(--bg); z-index: 1000; }
+.nav-btn { background: var(--card-bg); border: 1px solid var(--accent); color: var(--text-primary); padding: 10px 16px; border-radius: 50px; font-size: 10px; font-weight: 800; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.btn-install { background: var(--accent); color: white; border: none; }
+.btn-share { background: #10b981; color: white; border: none; }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; transition: 0.3s; }
+header { text-align: center; padding: 20px 20px 30px; }
+header h1 { font-size: 1.6rem; letter-spacing: 5px; font-weight: 900; text-transform: uppercase; margin-bottom: 8px; }
+.tagline { font-size: 12px; color: var(--text-secondary); font-weight: 500; max-width: 280px; margin: 0 auto; line-height: 1.4; }
 
-        body {
-            background-color: var(--bg);
-            color: var(--text-primary);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow-x: hidden;
-        }
+.main-container { flex: 1; width: 100%; max-width: 480px; margin: 0 auto; padding: 0 15px; }
+.platform-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 18px; padding: 20px; margin-bottom: 12px; text-decoration: none; color: inherit; display: flex; flex-direction: column; justify-content: center; min-height: 110px; }
+.platform-card:active { transform: scale(0.97); }
 
-        .top-nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            position: sticky;
-            top: 0;
-            background: var(--bg);
-            z-index: 1000;
-        }
+.badge-soon { background: #FF0000; color: #ffffff; font-size: 9px; font-weight: 900; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 1px; }
+.card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.platform-title { display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 14px; text-transform: uppercase; }
+.platform-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
 
-        .nav-btn {
-            background: var(--card-bg);
-            border: 1px solid var(--accent);
-            color: var(--text-primary);
-            padding: 10px 16px;
-            border-radius: 50px;
-            font-size: 10px;
-            font-weight: 800;
-            text-transform: uppercase;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            white-space: nowrap;
-        }
+footer { padding: 40px 20px; text-align: center; border-top: 1px solid var(--border); margin-top: 30px; }
+.social-links { display: flex; justify-content: center; gap: 25px; margin-bottom: 20px; }
+.social-links a { color: var(--text-secondary); font-size: 20px; }
+copyright { font-size: 9px; color: var(--text-secondary); letter-spacing: 1px; font-weight: 700; }
 
-        .btn-install { background: var(--accent); color: white; border: none; }
-        .btn-share { background: #10b981; color: white; border: none; }
-
-        header {
-            text-align: center;
-            padding: 20px 20px 30px;
-        }
-
-        header h1 {
-            font-size: 1.6rem;
-            letter-spacing: 5px;
-            font-weight: 900;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-        }
-
-        .tagline {
-            font-size: 12px;
-            color: var(--text-secondary);
-            font-weight: 500;
-            max-width: 280px;
-            margin: 0 auto;
-            line-height: 1.4;
-        }
-
-        .main-container {
-            flex: 1;
-            width: 100%;
-            max-width: 480px;
-            margin: 0 auto;
-            padding: 0 15px;
-        }
-
-        .platform-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 18px;
-            padding: 20px;
-            margin-bottom: 12px;
-            text-decoration: none;
-            color: inherit;
-            display: block;
-        }
-
-        .platform-card:active { transform: scale(0.97); }
-
-        /* Coming Soon Card Styles */
-        .platform-card.disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            pointer-events: none;
-        }
-
-        .badge-soon {
-            background: #FF0000;
-            color: #ffffff;
-            font-size: 9px;
-            font-weight: 900;
-            padding: 4px 10px;
-            border-radius: 20px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .platform-title {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 800;
-            font-size: 14px;
-            text-transform: uppercase;
-        }
-
-        .platform-desc {
-            font-size: 12px;
-            color: var(--text-secondary);
-            line-height: 1.5;
-        }
-
-        footer {
-            padding: 40px 20px;
-            text-align: center;
-            border-top: 1px solid var(--border);
-            margin-top: 30px;
-        }
-
-        .social-links {
-            display: flex;
-            justify-content: center;
-            gap: 25px;
-            margin-bottom: 20px;
-        }
-
-        .social-links a { color: var(--text-secondary); font-size: 20px; }
-
-        .copyright {
-            font-size: 9px;
-            color: var(--text-secondary);
-            letter-spacing: 1px;
-            font-weight: 700;
-        }
-    </style>
+#app { width: 100%; }
+</style>
 </head>
 <body data-theme="dark">
 
-    <div class="top-nav">
-        <button id="action-btn" class="nav-btn btn-install">
-            <i class="fas fa-download"></i> <span>Install</span>
-        </button>
+<div class="top-nav">
+    <button id="action-btn" class="nav-btn btn-install">
+        <i class="fas fa-download"></i> <span>Install</span>
+    </button>
 
-        <button class="nav-btn" id="theme-toggle">
-            <i class="fas fa-moon"></i> <span>Dark</span>
-        </button>
-    </div>
+    <button class="nav-btn" id="theme-toggle">
+        <i class="fas fa-moon"></i> <span>Dark</span>
+    </button>
+</div>
 
-    <header>
-        <h1>GRIEEZBOY DOWNLOADER</h1>
-        <p class="tagline">Your All In One Professional downloading solutions for social media content</p>
-    </header>
+<header>
+    <h1>GRIEEZBOY DOWNLOADER</h1>
+    <p class="tagline">Your All In One Professional downloading solutions for social media content</p>
+</header>
 
-    <div class="main-container">
-        <a href="Facebook/" class="platform-card">
-            <div class="card-header">
-                <div class="platform-title"><i class="fab fa-facebook" style="color: #1877F2;"></i> Facebook</div>
-                <i class="fas fa-chevron-right"></i>
-            </div>
-            <p class="platform-desc">Download HD videos and Reels from Facebook instantly with GrieezBoy processing.</p>
-        </a>
+<div class="main-container">
 
-        <a href="Instagram/" class="platform-card">
-            <div class="card-header">
-                <div class="platform-title"><i class="fab fa-instagram" style="color: #E1306C;"></i> Instagram</div>
-                <i class="fas fa-chevron-right"></i>
-            </div>
-            <p class="platform-desc">Download photos, videos, and Reels. Maintain original quality with fast extraction.</p>
-        </a>
+    <a href="Facebook/" class="platform-card"><div class="card-header"><div class="platform-title"><i class="fab fa-facebook" style="color: #1877F2;"></i> Facebook</div><i class="fas fa-chevron-right"></i></div><p class="platform-desc">Download HD videos and Reels from Facebook instantly with GrieezBoy processing.</p></a>
 
-        <a href="YouTube/" class="platform-card">
-            <div class="card-header">
-                <div class="platform-title"><i class="fab fa-youtube" style="color: #FF0000;"></i> YouTube</div>
-                <i class="fas fa-chevron-right"></i>
-            </div>
-            <p class="platform-desc">Download YouTube videos in MP4 format with multiple quality options. Fast extraction and direct video download to your device.</p>
-        </a>
+    <a href="Instagram/" class="platform-card"><div class="card-header"><div class="platform-title"><i class="fab fa-instagram" style="color: #E1306C;"></i> Instagram</div><i class="fas fa-chevron-right"></i></div><p class="platform-desc">Download photos, videos, and Reels. Maintain original quality with fast extraction.</p></a>
 
-        <a href="Tiktok/" class="platform-card">
-            <div class="card-header">
-                <div class="platform-title"><i class="fab fa-tiktok" style="color: #69C9D0;"></i> TikTok</div>
-                <i class="fas fa-chevron-right"></i>
-            </div>
-            <p class="platform-desc">Download TikTok videos without watermark in HD quality. Save directly to your device.</p>
-        </a>
+    <a href="YouTube/" class="platform-card"><div class="card-header"><div class="platform-title"><i class="fab fa-youtube" style="color: #FF0000;"></i> YouTube</div><i class="fas fa-chevron-right"></i></div><p class="platform-desc">Download YouTube videos in MP4 format with multiple quality options. Fast extraction and direct video download to your device.</p></a>
 
-        <a href="Twitter/" class="platform-card">
-            <div class="card-header">
-                <div class="platform-title"><i class="fa-brands fa-x-twitter"></i> Twitter (X)</div>
-                <i class="fas fa-chevron-right"></i>
-            </div>
-            <p class="platform-desc">Save high-definition videos and GIFs from X instantly using the fixed GrieezBoy Engine.</p>
-        </a>
+    <a href="Tiktok/" class="platform-card"><div class="card-header"><div class="platform-title"><i class="fab fa-tiktok" style="color: #69C9D0;"></i> TikTok</div><i class="fas fa-chevron-right"></i></div><p class="platform-desc">Download TikTok videos without watermark in HD quality. Save directly to your device.</p></a>
 
-        <a href="Thread/" class="platform-card">
-            <div class="card-header">
-                <div class="platform-title"><i class="fa-brands fa-threads"></i> Threads</div>
-                <i class="fas fa-chevron-right"></i>
-            </div>
-            <p class="platform-desc">Download videos and images from Threads. Preserve original resolution offline.</p>
-        </a>
+    <a href="Twitter/" class="platform-card"><div class="card-header"><div class="platform-title"><i class="fa-brands fa-x-twitter"></i> Twitter (X)</div><i class="fas fa-chevron-right"></i></div><p class="platform-desc">Save high-definition videos and GIFs from X instantly using the fixed GrieezBoy Engine.</p></a>
 
-        <a href="Pinterest/" class="platform-card">
-            <div class="card-header">
-                <div class="platform-title"><i class="fab fa-pinterest" style="color: #E60023;"></i> Pinterest</div>
-                <i class="fas fa-chevron-right"></i>
-            </div>
-            <p class="platform-desc">Download your favorite Pinterest videos and high-res pins for offline viewing.</p>
-        </a>
-    </div>
+    <a href="Thread/" class="platform-card"><div class="card-header"><div class="platform-title"><i class="fa-brands fa-threads"></i> Threads</div><i class="fas fa-chevron-right"></i></div><p class="platform-desc">Download videos and images from Threads. Preserve original resolution offline.</p></a>
 
-    <footer>
-        <div class="social-links">
-            <a href="https://wa.me/2348107461934"><i class="fab fa-whatsapp"></i></a>
-            <a href="https://t.me/GrieezBoy"><i class="fab fa-telegram"></i></a>
-            <a href="https://instagram.com/grieezboy"><i class="fab fa-instagram"></i></a>
-            <a href="https://x.com/Muhammadja71663"><i class="fa-brands fa-x-twitter"></i></a>
+    <a href="Pinterest/" class="platform-card"><div class="card-header"><div class="platform-title"><i class="fab fa-pinterest" style="color: #E60023;"></i> Pinterest</div><i class="fas fa-chevron-right"></i></div><p class="platform-desc">Download your favorite Pinterest videos and high-res pins for offline viewing.</p></a>
+
+    <a href="Video Hub" class="platform-card" onclick="loadPage('VideoHub')">
+        <div class="card-header">
+            <div class="platform-title"><i class="fas fa-video" style="color:#2563eb;"></i> Video Hub</div>
+            <i class="fas fa-chevron-right"></i>
         </div>
-        <div class="copyright">© 2026 GRIEEZBOY DOWNLOADER • ALL RIGHTS RESERVED</div>
-    </footer>
+        <p class="platform-desc">Search, stream, and download videos directly to your device instantly.</p>
+    </a>
 
-    <script>
-        const body = document.body;
-        const themeBtn = document.getElementById('theme-toggle');
-        const themeText = themeBtn.querySelector('span');
-        const themeIcon = themeBtn.querySelector('i');
+</div>
 
-        themeBtn.addEventListener('click', () => {
-            const isDark = body.getAttribute('data-theme') === 'dark';
-            body.setAttribute('data-theme', isDark ? 'light' : 'dark');
-            themeText.innerText = isDark ? "Light" : "Dark";
-            themeIcon.className = isDark ? "fas fa-sun" : "fas fa-moon";
+<div id="app"></div>
+
+<footer>
+    <div class="social-links">
+        <a href="https://wa.me/2348107461934"><i class="fab fa-whatsapp"></i></a>
+        <a href="https://t.me/GrieezBoy"><i class="fab fa-telegram"></i></a>
+        <a href="https://instagram.com/grieezboy"><i class="fab fa-instagram"></i></a>
+        <a href="https://x.com/Muhammadja71663"><i class="fa-brands fa-x-twitter"></i></a>
+    </div>
+    <div class="copyright">© 2026 GRIEEZBOY DOWNLOADER • ALL RIGHTS RESERVED</div>
+</footer>
+
+<script>
+// Theme toggle
+const body = document.body;
+const themeBtn = document.getElementById('theme-toggle');
+const themeText = themeBtn.querySelector('span');
+const themeIcon = themeBtn.querySelector('i');
+
+themeBtn.addEventListener('click', () => {
+    const isDark = body.getAttribute('data-theme') === 'dark';
+    body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    themeText.innerText = isDark ? "Light" : "Dark";
+    themeIcon.className = isDark ? "fas fa-sun" : "fas fa-moon";
+});
+
+// PWA install/share button
+let deferredPrompt;
+const actionBtn = document.getElementById('action-btn');
+const actionText = actionBtn.querySelector('span');
+const actionIcon = actionBtn.querySelector('i');
+const shareText = "Check out this amazing All-In-One media downloader!";
+const shareUrl = "https://grieezboy-downloader.zone.id/";
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    updateToInstallState();
+});
+
+if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+    updateToShareState();
+}
+
+actionBtn.addEventListener('click', async () => {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') updateToShareState();
+        deferredPrompt = null;
+    } else {
+        if (navigator.share) {
+            navigator.share({ title: 'GrieezBoy Downloader', text: shareText, url: shareUrl }).catch(console.error);
+        } else {
+            navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
+            alert("Share link copied to clipboard!");
+        }
+    }
+});
+
+function updateToInstallState() {
+    actionBtn.className = "nav-btn btn-install";
+    actionText.innerText = "Install";
+    actionIcon.className = "fas fa-download";
+}
+
+function updateToShareState() {
+    actionBtn.className = "nav-btn btn-share";
+    actionText.innerText = "Share";
+    actionIcon.className = "fas fa-share-alt";
+    deferredPrompt = null;
+}
+
+// SPA loader for Video Hub
+async function loadPage(folder){
+    const app = document.getElementById('app');
+    try{
+        const res = await fetch(folder + '/index.html');
+        const html = await res.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html,'text/html');
+        app.innerHTML = doc.body.innerHTML;
+        history.pushState({}, "", folder + "/");
+
+        // Re-run scripts inside loaded page
+        const scripts = doc.querySelectorAll('script');
+        scripts.forEach(oldScript=>{
+            const newScript = document.createElement('script');
+            newScript.textContent = oldScript.textContent;
+            document.body.appendChild(newScript);
         });
 
-        let deferredPrompt;
-        const actionBtn = document.getElementById('action-btn');
-        const actionText = actionBtn.querySelector('span');
-        const actionIcon = actionBtn.querySelector('i');
+        window.scrollTo(0,0);
+    }catch(err){
+        app.innerHTML="<p>Failed to load page.</p>";
+        console.error(err);
+    }
+}
 
-        const shareText = "Check out this amazing All-In-One media downloader!";
-        const shareUrl = "https://grieezboy-downloader.zone.id/";
+// Back button reload
+window.onpopstate = ()=>{ location.reload(); }
 
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            updateToInstallState();
-        });
-
-        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
-            updateToShareState();
-        }
-
-        actionBtn.addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') updateToShareState();
-                deferredPrompt = null;
-            } else {
-                if (navigator.share) {
-                    navigator.share({
-                        title: 'GrieezBoy Downloader',
-                        text: shareText,
-                        url: shareUrl
-                    }).catch(console.error);
-                } else {
-                    navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
-                    alert("Share link copied to clipboard!");
-                }
-            }
-        });
-
-        function updateToInstallState() {
-            actionBtn.className = "nav-btn btn-install";
-            actionText.innerText = "Install";
-            actionIcon.className = "fas fa-download";
-        }
-
-        function updateToShareState() {
-            actionBtn.className = "nav-btn btn-share";
-            actionText.innerText = "Share";
-            actionIcon.className = "fas fa-share-alt";
-            deferredPrompt = null;
-        }
-
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').catch(err => console.log("SW registration failed: ", err));
-            });
-        }
-    </script>
+// Service Worker
+if('serviceWorker' in navigator){
+    window.addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js').catch(err=>console.log("SW registration failed: ", err)); });
+}
+</script>
 </body>
 </html>
