@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Video Hub</title>
+
+<style>
+
+body{
+    background:#05070a;
+    color:white;
+    font-family:Arial,sans-serif;
+    padding:20px;
+}
+
+.container{
+    max-width:500px;
+    margin:auto;
+}
+
+.card{
+    background:#111827;
+    border-radius:18px;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,0.08);
+}
+
+.thumbnail{
+    width:100%;
+    display:block;
+}
+
+.content{
+    padding:15px;
+}
+
+.title{
+    font-size:18px;
+    font-weight:bold;
+    margin-bottom:10px;
+}
+
+.views{
+    color:#94a3b8;
+    font-size:13px;
+    margin-bottom:15px;
+}
+
+video{
+    width:100%;
+    border-radius:12px;
+    margin-bottom:15px;
+    background:black;
+}
+
+.actions{
+    display:flex;
+    gap:10px;
+}
+
+.btn{
+    flex:1;
+    text-align:center;
+    text-decoration:none;
+    padding:12px;
+    border-radius:12px;
+    font-weight:bold;
+    color:white;
+}
+
+.watch{
+    background:#2563eb;
+}
+
+.download{
+    background:#10b981;
+}
+
+.loading{
+    text-align:center;
+    padding:40px;
+}
+
+</style>
+</head>
+<body>
+
+<div class="container">
+
+    <div id="app" class="loading">
+        Loading video...
+    </div>
+
+</div>
+
+<script>
+
+const API_URL =
+"https://apis.davidcyril.name.ng/endpoints/xxx/#totoleak-trending";
+
+async function loadVideo(){
+
+    const app =
+    document.getElementById("app");
+
+    try{
+
+        const response =
+        await fetch(API_URL);
+
+        const data =
+        await response.json();
+
+        app.innerHTML = `
+
+        <div class="card">
+
+            <img
+            src="${data.thumbnail}"
+            class="thumbnail">
+
+            <div class="content">
+
+                <div class="title">
+                    ${data.title}
+                </div>
+
+                <div class="views">
+                    👁 ${data.views}
+                </div>
+
+                <video
+                controls
+                poster="${data.thumbnail}">
+
+                    <source
+                    src="${data.downloadUrl}"
+                    type="video/mp4">
+
+                </video>
+
+                <div class="actions">
+
+                    <a
+                    href="${data.downloadUrl}"
+                    target="_blank"
+                    class="btn watch">
+
+                    Watch
+
+                    </a>
+
+                    <a
+                    href="${data.downloadUrl}"
+                    download
+                    class="btn download">
+
+                    Download
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        `;
+
+    }catch(err){
+
+        console.log(err);
+
+        app.innerHTML =
+        "<p>Failed to load video.</p>";
+
+    }
+
+}
+
+loadVideo();
+
+</script>
+
+</body>
+</html>
