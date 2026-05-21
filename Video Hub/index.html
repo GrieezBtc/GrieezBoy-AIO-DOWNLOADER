@@ -3,197 +3,130 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Video Hub</title>
-
+<title>GrieezBoy Video Hub</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
-
-body{
-    background:#05070a;
-    color:white;
-    font-family:Arial;
-    padding:20px;
+:root {
+    --bg: #05070a; --card-bg: #111827; --text-primary: #ffffff;
+    --text-secondary: #94a3b8; --accent: #2563eb; --border: rgba(255,255,255,0.08);
 }
-
-.tabs{
-    display:flex;
-    gap:10px;
-    margin-bottom:20px;
-}
-
-button{
-    background:#2563eb;
-    color:white;
-    border:none;
-    padding:12px 16px;
-    border-radius:12px;
-    font-weight:bold;
-}
-
-.results{
-    display:grid;
-    gap:15px;
-}
-
-.card{
-    background:#111827;
-    border-radius:16px;
-    overflow:hidden;
-}
-
-.card img{
-    width:100%;
-    display:block;
-}
-
-.content{
-    padding:12px;
-}
-
-.title{
-    font-size:14px;
-    font-weight:bold;
-    margin-bottom:10px;
-}
-
-.meta{
-    color:#94a3b8;
-    font-size:12px;
-    margin-bottom:12px;
-}
-
-.actions{
-    display:flex;
-    gap:10px;
-}
-
-.actions a{
-    flex:1;
-    text-align:center;
-    text-decoration:none;
-    padding:10px;
-    border-radius:10px;
-    color:white;
-    font-size:13px;
-    font-weight:bold;
-}
-
-.watch{
-    background:#2563eb;
-}
-
-.download{
-    background:#10b981;
-}
-
+body[data-theme="light"] { --bg:#f8fafc; --card-bg:#ffffff; --text-primary:#1e293b; --text-secondary:#64748b; --border:rgba(0,0,0,0.1); }
+body{background:var(--bg);color:var(--text-primary);font-family:'Inter',sans-serif;margin:0;padding:0;min-height:100vh;display:flex;flex-direction:column;}
+.top-nav{display:flex;justify-content:space-between;align-items:center;padding:15px 20px;position:sticky;top:0;background:var(--bg);z-index:1000;border-bottom:1px solid var(--border);}
+.nav-btn{background:var(--card-bg);border:1px solid var(--accent);color:var(--text-primary);padding:10px 16px;border-radius:50px;font-size:10px;font-weight:800;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;gap:6px;}
+.search-container{padding:15px 20px;background:var(--bg);}
+.search-container input{width:100%;padding:10px;border-radius:12px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);}
+.main-container{max-width:480px;margin:0 auto;padding:15px;}
+.platform-card,.card{background:var(--card-bg);border:1px solid var(--border);border-radius:18px;padding:20px;margin-bottom:12px;color:inherit;}
+.card img{width:100%;display:block;border-radius:12px;}
+.card video{width:100%;border-radius:12px;margin-bottom:15px;background:black;}
+.card .content{padding:15px 0 0;}
+.card .title{font-weight:800;font-size:16px;margin-bottom:8px;}
+.card .views{color:var(--text-secondary);font-size:12px;margin-bottom:10px;}
+.actions{display:flex;gap:10px;}
+.actions a{flex:1;text-align:center;text-decoration:none;padding:10px;border-radius:12px;font-weight:bold;color:white;}
+.watch{background:var(--accent);}
+.download{background:#10b981;}
+.loading{text-align:center;padding:40px;}
+footer{padding:40px 20px;text-align:center;border-top:1px solid var(--border);margin-top:20px;}
+.social-links{display:flex;justify-content:center;gap:25px;margin-bottom:20px;}
+.social-links a{color:var(--text-secondary);font-size:20px;}
 </style>
 </head>
-<body>
+<body data-theme="dark">
 
-<h2>🎬 Video Hub</h2>
-
-<div class="tabs">
-    <button onclick="loadVideos('latest')">
-        Latest
-    </button>
-
-    <button onclick="loadVideos('trending')">
-        Trending
-    </button>
+<div class="top-nav">
+    <button class="nav-btn" onclick="backHome()"><i class="fas fa-arrow-left"></i> Home</button>
+    <button class="nav-btn" id="theme-toggle"><i class="fas fa-moon"></i> <span>Dark</span></button>
 </div>
 
-<div class="results" id="results"></div>
+<div class="search-container">
+    <input type="text" id="searchInput" placeholder="Search videos...">
+</div>
+
+<div id="app" class="main-container">
+    <p class="loading">Loading trending videos...</p>
+</div>
+
+<footer>
+    <div class="social-links">
+        <a href="https://wa.me/2348107461934"><i class="fab fa-whatsapp"></i></a>
+        <a href="https://t.me/GrieezBoy"><i class="fab fa-telegram"></i></a>
+        <a href="https://instagram.com/grieezboy"><i class="fab fa-instagram"></i></a>
+        <a href="https://x.com/Muhammadja71663"><i class="fa-brands fa-x-twitter"></i></a>
+    </div>
+    <div>© 2026 GRIEEZBOY DOWNLOADER • ALL RIGHTS RESERVED</div>
+</footer>
 
 <script>
+// Theme toggle
+const body = document.body;
+const themeBtn = document.getElementById('theme-toggle');
+const themeText = themeBtn.querySelector('span');
+const themeIcon = themeBtn.querySelector('i');
+themeBtn.addEventListener('click', ()=>{
+    const isDark = body.getAttribute('data-theme')==='dark';
+    body.setAttribute('data-theme',isDark?'light':'dark');
+    themeText.innerText = isDark?"Light":"Dark";
+    themeIcon.className = isDark?"fas fa-sun":"fas fa-moon";
+});
 
-const API_URL =
-"https://apis.davidcyril.name.ng/xxx/bokepnoz";
+// Back to home
+function backHome(){
+    document.getElementById('app').innerHTML = '<p class="loading">Type a keyword or see trending videos...</p>';
+    document.getElementById('searchInput').value = '';
+}
 
-let apiData = null;
+// Pixabay API key
+const PIXABAY_API_KEY = "55953678-ccfdb9ba0957e6de8b0c5bbf8"; // replace with your key
 
-async function fetchData(){
-
+// Load videos (either search or trending)
+async function loadVideos(query="nature"){
+    const app = document.getElementById('app');
+    app.innerHTML = '<p class="loading">Loading videos...</p>';
     try{
-
-        const response =
-        await fetch(API_URL);
-
-        const data =
-        await response.json();
-
-        apiData = data.data;
-
-        loadVideos("latest");
-
+        const res = await fetch(`https://pixabay.com/api/videos/?key=${PIXABAY_API_KEY}&q=${encodeURIComponent(query)}&per_page=10`);
+        if(!res.ok) throw new Error('API failed');
+        const data = await res.json();
+        if(!data.hits || data.hits.length===0){
+            app.innerHTML = '<p>No videos found.</p>'; return;
+        }
+        let html = '';
+        data.hits.forEach(video=>{
+            const videoUrl = video.videos.medium.url;
+            html += `
+            <div class="card">
+                <img src="://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885_1280.jpg" class="thumbnail">
+                <div class="content">
+                    <div class="title">${video.tags}</div>
+                    <div class="views">👁 ${video.views} views</div>
+                    <video controls playsinline webkit-playsinline poster="">
+                        <source src="${videoUrl}" type="video/mp4">
+                    </video>
+                    <div class="actions">
+                        <a href="${videoUrl}" target="_blank" class="btn watch">Watch</a>
+                        <a href="${videoUrl}" download class="btn download">Download</a>
+                    </div>
+                </div>
+            </div>`;
+        });
+        app.innerHTML = html;
     }catch(err){
-
-        console.log(err);
-
-        document.getElementById("results").innerHTML =
-        "<p>Failed to load videos.</p>";
-
+        console.error(err);
+        app.innerHTML = '<p>Failed to load videos.</p>';
     }
-
 }
 
-function loadVideos(type){
+// Search input listener
+document.getElementById('searchInput').addEventListener('keypress', e=>{
+    if(e.key==='Enter'){
+        const query = e.target.value.trim();
+        if(query) loadVideos(query);
+    }
+});
 
-    const results =
-    document.getElementById("results");
-
-    results.innerHTML = "";
-
-    apiData[type].forEach(video => {
-
-        results.innerHTML += `
-
-        <div class="card">
-
-            <img src="${video.thumbnail}">
-
-            <div class="content">
-
-                <div class="title">
-                    ${video.title}
-                </div>
-
-                <div class="meta">
-                    ⏱ ${video.duration}
-                    • 👁 ${video.views}
-                </div>
-
-                <div class="actions">
-
-                    <a href="${video.url}"
-                    target="_blank"
-                    class="watch">
-
-                    Watch
-
-                    </a>
-
-                    <a href="${video.url}"
-                    download
-                    class="download">
-
-                    Download
-
-                    </a>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        `;
-
-    });
-
-}
-
-fetchData();
-
+// Load trending videos on page load
+window.addEventListener('load', ()=>loadVideos());
 </script>
 
 </body>
