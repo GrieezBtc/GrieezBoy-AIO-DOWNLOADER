@@ -11,48 +11,55 @@
 body{
     background:#05070a;
     color:white;
-    font-family:Arial,sans-serif;
+    font-family:Arial;
     padding:20px;
 }
 
-.container{
-    max-width:500px;
-    margin:auto;
+.tabs{
+    display:flex;
+    gap:10px;
+    margin-bottom:20px;
+}
+
+button{
+    background:#2563eb;
+    color:white;
+    border:none;
+    padding:12px 16px;
+    border-radius:12px;
+    font-weight:bold;
+}
+
+.results{
+    display:grid;
+    gap:15px;
 }
 
 .card{
     background:#111827;
-    border-radius:18px;
+    border-radius:16px;
     overflow:hidden;
-    border:1px solid rgba(255,255,255,0.08);
 }
 
-.thumbnail{
+.card img{
     width:100%;
     display:block;
 }
 
 .content{
-    padding:15px;
+    padding:12px;
 }
 
 .title{
-    font-size:18px;
+    font-size:14px;
     font-weight:bold;
     margin-bottom:10px;
 }
 
-.views{
+.meta{
     color:#94a3b8;
-    font-size:13px;
-    margin-bottom:15px;
-}
-
-video{
-    width:100%;
-    border-radius:12px;
-    margin-bottom:15px;
-    background:black;
+    font-size:12px;
+    margin-bottom:12px;
 }
 
 .actions{
@@ -60,14 +67,15 @@ video{
     gap:10px;
 }
 
-.btn{
+.actions a{
     flex:1;
     text-align:center;
     text-decoration:none;
-    padding:12px;
-    border-radius:12px;
-    font-weight:bold;
+    padding:10px;
+    border-radius:10px;
     color:white;
+    font-size:13px;
+    font-weight:bold;
 }
 
 .watch{
@@ -78,32 +86,32 @@ video{
     background:#10b981;
 }
 
-.loading{
-    text-align:center;
-    padding:40px;
-}
-
 </style>
 </head>
 <body>
 
-<div class="container">
+<h2>🎬 Video Hub</h2>
 
-    <div id="app" class="loading">
-        Loading video...
-    </div>
+<div class="tabs">
+    <button onclick="loadVideos('latest')">
+        Latest
+    </button>
 
+    <button onclick="loadVideos('trending')">
+        Trending
+    </button>
 </div>
+
+<div class="results" id="results"></div>
 
 <script>
 
 const API_URL =
-"https://apis.davidcyril.name.ng/endpoints/xxx/#totoleak-trending";
+"https://your-safe-api.com/videos";
 
-async function loadVideo(){
+let apiData = null;
 
-    const app =
-    document.getElementById("app");
+async function fetchData(){
 
     try{
 
@@ -113,49 +121,60 @@ async function loadVideo(){
         const data =
         await response.json();
 
-        app.innerHTML = `
+        apiData = data.data;
+
+        loadVideos("latest");
+
+    }catch(err){
+
+        console.log(err);
+
+        document.getElementById("results").innerHTML =
+        "<p>Failed to load videos.</p>";
+
+    }
+
+}
+
+function loadVideos(type){
+
+    const results =
+    document.getElementById("results");
+
+    results.innerHTML = "";
+
+    apiData[type].forEach(video => {
+
+        results.innerHTML += `
 
         <div class="card">
 
-            <img
-            src="${data.thumbnail}"
-            class="thumbnail">
+            <img src="${video.thumbnail}">
 
             <div class="content">
 
                 <div class="title">
-                    ${data.title}
+                    ${video.title}
                 </div>
 
-                <div class="views">
-                    👁 ${data.views}
+                <div class="meta">
+                    ⏱ ${video.duration}
+                    • 👁 ${video.views}
                 </div>
-
-                <video
-                controls
-                poster="${data.thumbnail}">
-
-                    <source
-                    src="${data.downloadUrl}"
-                    type="video/mp4">
-
-                </video>
 
                 <div class="actions">
 
-                    <a
-                    href="${data.downloadUrl}"
+                    <a href="${video.url}"
                     target="_blank"
-                    class="btn watch">
+                    class="watch">
 
                     Watch
 
                     </a>
 
-                    <a
-                    href="${data.downloadUrl}"
+                    <a href="${video.url}"
                     download
-                    class="btn download">
+                    class="download">
 
                     Download
 
@@ -169,18 +188,11 @@ async function loadVideo(){
 
         `;
 
-    }catch(err){
-
-        console.log(err);
-
-        app.innerHTML =
-        "<p>Failed to load video.</p>";
-
-    }
+    });
 
 }
 
-loadVideo();
+fetchData();
 
 </script>
 
