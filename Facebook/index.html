@@ -34,11 +34,8 @@
         .result-card { display: none; background: var(--card-bg); border-radius: 14px; padding: 15px; border: 1px solid var(--accent); margin-top: 20px; text-align: left; }
         .preview-box { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
         .thumb { width: 100%; border-radius: 8px; display: block; aspect-ratio: 16/9; object-fit: cover; background: #000; }
-        .vid-preview { width: 100%; border-radius: 8px; display: block; aspect-ratio: 16/9; object-fit: cover; background: #000; border: 2px solid var(--accent); }
         .preview-label { font-size: 10px; text-transform: uppercase; color: var(--accent); font-weight: 700; letter-spacing: 0.5px; margin-bottom: -5px; }
         .btn-action { width: 100%; background: var(--accent); color: white; border: none; padding: 16px; border-radius: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; margin-bottom: 10px; font-size: 13px; text-transform: uppercase; }
-        .btn-copy { background: #1e293b; font-size: 11px; border: 1px solid var(--border); }
-        .dl-hint { font-size: 11px; color: var(--text-secondary); text-align: center; margin-top: -5px; margin-bottom: 15px; line-height: 1.4; }
         .how-to { text-align: left; margin: 30px 0 50px 0; padding: 0 10px; }
         .how-to h3 { font-size: 16px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; color: var(--text-primary); }
         .how-to ol { padding-left: 20px; color: var(--text-secondary); font-size: 14px; }
@@ -61,7 +58,7 @@
     <div class="container">
         <div class="header-icon"><i class="fab fa-facebook"></i></div>
         <h1>Facebook Downloader</h1>
-        <p class="description">Download high-quality videos from Facebook with ease. Powered by the David Cyril Engine.</p>
+        <p class="description">Download high-quality videos from Facebook with ease. Powered by the GrieezBoy Engine.</p>
 
         <div class="input-card">
             <input type="text" id="fb-url" class="input-field" placeholder="Paste Facebook video URL here">
@@ -71,23 +68,18 @@
 
             <div id="loader">
                 <div class="spinner"></div>
-                <p style="margin-top:10px; font-size:12px; color:var(--accent)">DAVID CYRIL ENGINE IS PROCESSING...</p>
+                <p style="margin-top:10px; font-size:12px; color:var(--accent)">GRIEEZBOY ENGINE IS PROCESSING...</p>
             </div>
 
             <div id="result" class="result-card">
                 <div class="preview-box">
                     <p class="preview-label">Thumbnail</p>
                     <img id="thumb" class="thumb" src="" alt="Thumbnail">
-                    <p class="preview-label" style="margin-top:8px;">HD Preview</p>
-                    <img id="vid-preview" class="vid-preview" src="" alt="Video Preview">
                 </div>
-                <a id="dl-trigger" class="btn-action" target="_blank" rel="noopener noreferrer">
-                    <i class="fas fa-download"></i> TAP TO DOWNLOAD NOW
+
+                <a id="dl-trigger" class="btn-action">
+                    <i class="fas fa-download"></i> DOWNLOAD NOW
                 </a>
-                <p class="dl-hint"><b>Tip:</b> If the video plays instead of downloading, tap the <b>three dots (⋮)</b> on the video player and select <b>Download</b>.</p>
-                <button id="copy-trigger" class="btn-action btn-copy">
-                    <i class="fas fa-copy"></i> COPY DIRECT LINK
-                </button>
             </div>
         </div>
 
@@ -95,10 +87,10 @@
             <h3><i class="fas fa-info-circle"></i> How to use:</h3>
             <ol>
                 <li>Open Facebook and find the video you want to download.</li>
-                <li>Copy the video URL from your browser's address bar or share menu.</li>
+                <li>Copy the video URL from the video or tap the share menu.</li>
                 <li>Paste the URL in the input field above.</li>
-                <li>Click "Fetch Video" to generate the download preview.</li>
-                <li>Click the download button to save the file via the David Cyril Engine.</li>
+                <li>Click "Fetch Video" to generate the thumbnail.</li>
+                <li>Click the download button to save the video directly.</li>
             </ol>
         </div>
     </div>
@@ -116,47 +108,55 @@
     <script>
         async function initDownload() {
             const fbUrl = document.getElementById('fb-url').value.trim();
-            if (!fbUrl) { alert("Please paste a Facebook video URL!"); return; }
+            if (!fbUrl) { 
+                alert("Please paste a Facebook video URL!"); 
+                return; 
+            }
 
             const loader = document.getElementById('loader');
             const resultBox = document.getElementById('result');
             loader.style.display = "block";
             resultBox.style.display = "none";
 
-            // New API endpoint
             const apiTarget = `https://apis.davidcyril.name.ng/download/aiov2?url=${encodeURIComponent(fbUrl)}`;
 
             try {
                 const response = await fetch(apiTarget);
                 const data = await response.json();
 
-                // Validate new response structure
                 if (!data || data.status !== true || !data.result || data.result.length === 0) {
                     throw new Error("No video found in response");
                 }
 
-                const videoItem = data.result[0];   // first (and usually only) result
+                const videoItem = data.result[0];
                 const thumbnail = videoItem.thumbnail;
-                const videoPreview = videoItem.video_preview;
                 const videoDownload = videoItem.video_download;
 
                 if (!videoDownload) { throw new Error("No downloadable video link"); }
 
-                // Set thumbnail and video preview images
+                // Set thumbnail
                 document.getElementById('thumb').src = thumbnail || '';
-                document.getElementById('vid-preview').src = videoPreview || '';
 
+                // Download button: internal handling
                 const dlBtn = document.getElementById('dl-trigger');
-                const copyBtn = document.getElementById('copy-trigger');
-
-                dlBtn.href = videoDownload;
-
-                copyBtn.onclick = () => {
-                    navigator.clipboard.writeText(videoDownload);
-                    copyBtn.innerHTML = '<i class="fas fa-check"></i> COPIED!';
-                    setTimeout(() => {
-                        copyBtn.innerHTML = '<i class="fas fa-copy"></i> COPY DIRECT LINK';
-                    }, 2000);
+                dlBtn.onclick = async () => {
+                    try {
+                        dlBtn.innerText = 'Downloading...';
+                        const resp = await fetch(videoDownload);
+                        const blob = await resp.blob();
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `facebook_video_${Date.now()}.mp4`;
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                        URL.revokeObjectURL(url);
+                        dlBtn.innerText = 'DOWNLOAD NOW';
+                    } catch (err) {
+                        console.error(err);
+                        dlBtn.innerText = 'DOWNLOAD FAILED';
+                    }
                 };
 
                 loader.style.display = "none";
