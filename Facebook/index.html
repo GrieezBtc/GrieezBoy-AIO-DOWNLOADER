@@ -32,7 +32,10 @@
         .spinner { width: 30px; height: 30px; border: 3px solid var(--accent); border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .result-card { display: none; background: var(--card-bg); border-radius: 14px; padding: 15px; border: 1px solid var(--accent); margin-top: 20px; text-align: left; }
-        .thumb { width: 100%; border-radius: 8px; margin-bottom: 15px; display: block; aspect-ratio: 16/9; object-fit: cover; background: #000; }
+        .preview-box { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
+        .thumb { width: 100%; border-radius: 8px; display: block; aspect-ratio: 16/9; object-fit: cover; background: #000; }
+        .vid-preview { width: 100%; border-radius: 8px; display: block; aspect-ratio: 16/9; object-fit: cover; background: #000; border: 2px solid var(--accent); }
+        .preview-label { font-size: 10px; text-transform: uppercase; color: var(--accent); font-weight: 700; letter-spacing: 0.5px; margin-bottom: -5px; }
         .btn-action { width: 100%; background: var(--accent); color: white; border: none; padding: 16px; border-radius: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; margin-bottom: 10px; font-size: 13px; text-transform: uppercase; }
         .btn-copy { background: #1e293b; font-size: 11px; border: 1px solid var(--border); }
         .dl-hint { font-size: 11px; color: var(--text-secondary); text-align: center; margin-top: -5px; margin-bottom: 15px; line-height: 1.4; }
@@ -58,7 +61,7 @@
     <div class="container">
         <div class="header-icon"><i class="fab fa-facebook"></i></div>
         <h1>Facebook Downloader</h1>
-        <p class="description">Download high-quality videos from Facebook with ease. Powered by the GrieezBoy High-Speed Engine.</p>
+        <p class="description">Download high-quality videos from Facebook with ease. Powered by the David Cyril Engine.</p>
 
         <div class="input-card">
             <input type="text" id="fb-url" class="input-field" placeholder="Paste Facebook video URL here">
@@ -68,11 +71,16 @@
 
             <div id="loader">
                 <div class="spinner"></div>
-                <p style="margin-top:10px; font-size:12px; color:var(--accent)">GRIEEZBOY IS ANALYZING VIDEO...</p>
+                <p style="margin-top:10px; font-size:12px; color:var(--accent)">DAVID CYRIL ENGINE IS PROCESSING...</p>
             </div>
 
             <div id="result" class="result-card">
-                <img id="thumb" class="thumb" src="" alt="Preview">
+                <div class="preview-box">
+                    <p class="preview-label">Thumbnail</p>
+                    <img id="thumb" class="thumb" src="" alt="Thumbnail">
+                    <p class="preview-label" style="margin-top:8px;">HD Preview</p>
+                    <img id="vid-preview" class="vid-preview" src="" alt="Video Preview">
+                </div>
                 <a id="dl-trigger" class="btn-action" target="_blank" rel="noopener noreferrer">
                     <i class="fas fa-download"></i> TAP TO DOWNLOAD NOW
                 </a>
@@ -90,7 +98,7 @@
                 <li>Copy the video URL from your browser's address bar or share menu.</li>
                 <li>Paste the URL in the input field above.</li>
                 <li>Click "Fetch Video" to generate the download preview.</li>
-                <li>Click the download button to save the file via the GrieezBoy Engine.</li>
+                <li>Click the download button to save the file via the David Cyril Engine.</li>
             </ol>
         </div>
     </div>
@@ -115,29 +123,40 @@
             loader.style.display = "block";
             resultBox.style.display = "none";
 
-            const apiTarget = `https://eliteprotech-apis.zone.id/facebook?url=${encodeURIComponent(fbUrl)}`;
+            // New API endpoint
+            const apiTarget = `https://apis.davidcyril.name.ng/download/aiov2?url=${encodeURIComponent(fbUrl)}`;
 
             try {
                 const response = await fetch(apiTarget);
                 const data = await response.json();
 
-                if (!data || data.success !== true) { throw new Error("Video not found"); }
+                // Validate new response structure
+                if (!data || data.status !== true || !data.result || data.result.length === 0) {
+                    throw new Error("No video found in response");
+                }
 
-                const videoLink = data.video;
-                const thumbnail = data.thumbnail;
-                if (!videoLink) { throw new Error("No video returned"); }
+                const videoItem = data.result[0];   // first (and usually only) result
+                const thumbnail = videoItem.thumbnail;
+                const videoPreview = videoItem.video_preview;
+                const videoDownload = videoItem.video_download;
 
-                document.getElementById('thumb').src = thumbnail;
+                if (!videoDownload) { throw new Error("No downloadable video link"); }
+
+                // Set thumbnail and video preview images
+                document.getElementById('thumb').src = thumbnail || '';
+                document.getElementById('vid-preview').src = videoPreview || '';
+
                 const dlBtn = document.getElementById('dl-trigger');
                 const copyBtn = document.getElementById('copy-trigger');
 
-                // Apply the direct link
-                dlBtn.href = videoLink;
+                dlBtn.href = videoDownload;
 
                 copyBtn.onclick = () => {
-                    navigator.clipboard.writeText(videoLink);
-                    copyBtn.innerHTML = "COPIED!";
-                    setTimeout(() => { copyBtn.innerHTML = '<i class="fas fa-copy"></i> COPY DIRECT LINK'; }, 2000);
+                    navigator.clipboard.writeText(videoDownload);
+                    copyBtn.innerHTML = '<i class="fas fa-check"></i> COPIED!';
+                    setTimeout(() => {
+                        copyBtn.innerHTML = '<i class="fas fa-copy"></i> COPY DIRECT LINK';
+                    }, 2000);
                 };
 
                 loader.style.display = "none";
@@ -145,7 +164,7 @@
             } catch (error) {
                 console.error(error);
                 loader.style.display = "none";
-                alert("Video not found. Make sure the Facebook post is public.");
+                alert("Video not found. Make sure the Facebook post is public and the URL is correct.");
             }
         }
 
