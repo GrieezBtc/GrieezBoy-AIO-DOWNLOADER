@@ -82,12 +82,15 @@
 
             <div id="loader">
                 <div class="spinner"></div>
-                <p id="status" style="margin-top:10px; font-size:12px; color:var(--accent2)">BYPASSING REGIONAL BLOCKS...</p>
+                <p id="status" style="margin-top:10px; font-size:12px; color:var(--accent2)">PROCESSING REQUEST...</p>
             </div>
 
             <div id="result" class="result-card">
                 <img id="thumb" class="thumb" src="" alt="Preview">
                 <div id="video-title" class="video-title"></div>
+                <div style="font-size:11px;color:var(--text-secondary);margin-bottom:10px;">
+                    Select download format
+                </div>
                 <div id="links-container"></div>
             </div>
         </div>
@@ -124,59 +127,66 @@
 
         async function initDownload() {
             const tiktokUrl = document.getElementById('tk-url').value;
-            if (!tiktokUrl) return alert("Please paste a link!");
+            if (!tiktokUrl) return;
 
             document.getElementById('loader').style.display = 'block';
             document.getElementById('result').style.display = 'none';
 
-            const proxies = [
-                "https://api.allorigins.win/get?url=",
-                "https://corsproxy.io/?",
-                "https://api.codetabs.com/v1/proxy?quest="
-            ];
-
             const apiBase = `https://eliteprotech-apis.zone.id/tiktok?url=${encodeURIComponent(tiktokUrl)}`;
 
-            for (let proxy of proxies) {
-                try {
-                    document.getElementById('status').innerText = "FETCHING DATA...";
-                    const response = await fetch(proxy + encodeURIComponent(apiBase));
-                    if (!response.ok) continue;
+            try {
+                const res = await fetch(apiBase);
+                const data = await res.json();
 
-                    let data = await response.json();
-                    if (data.contents) data = JSON.parse(data.contents);
-
-                    if (data.success || data.status === "success") {
-                        renderUI(data);
-                        return;
-                    }
-                } catch (err) {
-                    console.warn("Proxy fail, retrying...");
+                if (!data || data.success !== true) {
+                    throw new Error("API failed");
                 }
+
+                renderUI(data);
+
+            } catch (err) {
+                console.error(err);
+                alert("TikTok server error. Try again later.");
+                document.getElementById('loader').style.display = 'none';
             }
-            alert("GrieezBoy Engine: TikTok Server error. Please try again in a moment.");
-            document.getElementById('loader').style.display = 'none';
         }
 
         function renderUI(data) {
-            document.getElementById('thumb').src = data.thumbnail;
+            document.getElementById('thumb').src = data.thumbnail || "";
             document.getElementById('video-title').innerText = data.title || "TikTok Media Ready";
+
             const container = document.getElementById('links-container');
             container.innerHTML = "";
 
-            if (data.mp4_hd || data.mp4) {
-                const videoLink = data.mp4_hd || data.mp4;
-                container.innerHTML += `
-                    <a href="${videoLink}" target="_blank" class="btn-action btn-hd">
-                        <i class="fas fa-video"></i> DOWNLOAD HD (NO LOGO)
-                    </a>`;
+            const createBtn = (url, label, icon, cls) => {
+                const a = document.createElement("a");
+                a.href = url;
+                a.target = "_blank";
+                a.className = `btn-action ${cls}`;
+                a.innerHTML = `<i class="${icon}"></i> ${label}`;
+                return a;
+            };
+
+            const hd = data.mp4_hd;
+            const sd = data.mp4;
+            const audio = data.mp3;
+
+            if (hd) {
+                container.appendChild(
+                    createBtn(hd, "DOWNLOAD HD (HIGH QUALITY)", "fas fa-video", "btn-hd")
+                );
             }
 
-            if (data.mp3) {
-                container.innerHTML += `
-                    <a href="${data.mp3}" target="_blank" class="btn-action btn-mp3">
-                        <i class="fas fa-music"></i> DOWNLOAD MP3 (AUDIO)
-                    </a>`;
+            if (sd) {
+                container.appendChild(
+                    createBtn(sd, "DOWNLOAD MP4 (STANDARD)", "fas fa-film", "btn-fetch")
+                );
+            }
+
+            if (audio) {
+                container.appendChild(
+                    createBtn(audio, "DOWNLOAD MP3 (AUDIO ONLY)", "fas fa-music", "btn-mp3")
+                );
             }
 
             document.getElementById('loader').style.display = 'none';
