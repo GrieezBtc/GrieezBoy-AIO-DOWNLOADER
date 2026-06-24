@@ -5,10 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GrieezBoy Video Hub</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <style>
 :root {
     --bg: #05070a; --card-bg: #111827; --text-primary: #ffffff;
     --text-secondary: #94a3b8; --accent: #2563eb; --border: rgba(255,255,255,0.08);
+    --status-bg: #ef4444;
 }
 body[data-theme="light"] { --bg:#f8fafc; --card-bg:#ffffff; --text-primary:#1e293b; --text-secondary:#64748b; --border:rgba(0,0,0,0.1); }
 body{background:var(--bg);color:var(--text-primary);font-family:'Inter',sans-serif;margin:0;padding:0;min-height:100vh;display:flex;flex-direction:column;}
@@ -17,23 +19,43 @@ body{background:var(--bg);color:var(--text-primary);font-family:'Inter',sans-ser
 .search-container{padding:15px 20px;background:var(--bg);}
 .search-container input{width:100%;padding:10px;border-radius:12px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);}
 .main-container{max-width:480px;margin:0 auto;padding:15px;}
-.platform-card,.card{background:var(--card-bg);border:1px solid var(--border);border-radius:18px;padding:20px;margin-bottom:12px;color:inherit;}
-.card img{width:100%;display:block;border-radius:12px;}
-.card video{width:100%;border-radius:12px;margin-bottom:15px;background:black;}
-.card .content{padding:15px 0 0;}
-.card .title{font-weight:800;font-size:16px;margin-bottom:8px;}
-.card .views{color:var(--text-secondary);font-size:12px;margin-bottom:10px;}
+.card{background:var(--card-bg);border:1px solid var(--border);border-radius:18px;padding:20px;margin-bottom:12px;color:inherit;outline:none;}
+.card:focus-within{border-color:var(--accent);}
+.card img.thumbnail{width:100%;display:block;border-radius:12px;margin-bottom:10px;aspect-ratio:16/9;object-fit:cover;background:#1f2937;}
+.card video{width:100%;border-radius:12px;margin-bottom:15px;background:black;display:none;aspect-ratio:16/9;}
+.card .content{padding:5px 0 0;}
+.card .title{font-weight:800;font-size:16px;margin-bottom:8px;line-height:1.4;}
+.card .views{color:var(--text-secondary);font-size:12px;margin-bottom:15px;}
 .actions{display:flex;gap:10px;}
-.actions a{flex:1;text-align:center;text-decoration:none;padding:10px;border-radius:12px;font-weight:bold;color:white;}
+.actions button{flex:1;text-align:center;padding:10px;border-radius:12px;font-weight:bold;color:white;border:none;cursor:pointer;font-family:inherit;font-size:14px;transition:opacity 0.2s;}
+.actions button:disabled{opacity:0.5;cursor:not-allowed;}
 .watch{background:var(--accent);}
 .download{background:#10b981;}
+.share{background:#6366f1;}
 .loading{text-align:center;padding:40px;}
-footer{padding:40px 20px;text-align:center;border-top:1px solid var(--border);margin-top:20px;}
+#sentinel{display:none;text-align:center;padding:20px;color:var(--text-secondary);}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1f2937;color:#fff;padding:12px 24px;border-radius:50px;z-index:2000;font-size:14px;box-shadow:0 4px 6px rgba(0,0,0,0.3);}
+#network-banner{display:none;position:fixed;top:0;width:100%;background:var(--status-bg);color:white;text-align:center;padding:10px;z-index:2001;font-weight:bold;font-size:12px;}
+footer{padding:40px 20px;text-align:center;border-top:1px solid var(--border);margin-top:auto;}
 .social-links{display:flex;justify-content:center;gap:25px;margin-bottom:20px;}
 .social-links a{color:var(--text-secondary);font-size:20px;}
+
+@keyframes shimmer{0%{background-position:-1000px 0}100%{background-position:1000px 0}}
+.skeleton{
+    background:#1f2937;
+    background-image:linear-gradient(to right,#1f2937 0%,#374151 20%,#1f2937 40%,#1f2937 100%);
+    background-repeat:no-repeat;
+    background-size:2000px 100%;
+    animation:shimmer 2s infinite linear;
+    border-radius:12px;
+    height: 200px;
+    margin-bottom: 12px;
+}
 </style>
 </head>
 <body data-theme="dark">
+
+<div id="network-banner">OFFLINE - CHECK CONNECTION</div>
 
 <div class="top-nav">
     <button class="nav-btn" onclick="backHome()"><i class="fas fa-arrow-left"></i> Home</button>
@@ -45,8 +67,10 @@ footer{padding:40px 20px;text-align:center;border-top:1px solid var(--border);ma
 </div>
 
 <div id="app" class="main-container">
-    <p class="loading">Loading trending videos...</p>
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
 </div>
+<div id="sentinel">Loading more videos...</div>
 
 <footer>
     <div class="social-links">
@@ -59,74 +83,363 @@ footer{padding:40px 20px;text-align:center;border-top:1px solid var(--border);ma
 </footer>
 
 <script>
-// Theme toggle
+// Telemetry & Network
+function sendTelemetry(type, data) {
+    if (navigator.sendBeacon) {
+        navigator.sendBeacon('/api/telemetry', JSON.stringify({ type, data, ts: Date.now() }));
+    }
+}
+
+window.addEventListener('online', () => document.getElementById('network-banner').style.display = 'none');
+window.addEventListener('offline', () => document.getElementById('network-banner').style.display = 'block');
+
+// Keyboard Navigation
+document.addEventListener('keydown', (e) => {
+    const activeVideo = document.querySelector('video:not([style*="display: none"])');
+    const cards = Array.from(document.querySelectorAll('.card'));
+    const focusedCard = document.activeElement.closest('.card') || cards.find(c => c.getBoundingClientRect().top > 0);
+
+    switch(e.key) {
+        case ' ':
+            if (activeVideo) {
+                e.preventDefault();
+                activeVideo.paused ? activeVideo.play() : activeVideo.pause();
+            }
+            break;
+        case 'ArrowDown':
+            window.scrollBy(0, 300);
+            break;
+        case 'ArrowUp':
+            window.scrollBy(0, -300);
+            break;
+        case 'Enter':
+            if (focusedCard) {
+                const btn = focusedCard.querySelector('.watch');
+                if (btn) btn.click();
+            }
+            break;
+        case 'Escape':
+            if (document.fullscreenElement) document.exitFullscreen();
+            document.querySelectorAll('video').forEach(v => v.pause());
+            break;
+    }
+});
+
 const body = document.body;
 const themeBtn = document.getElementById('theme-toggle');
 const themeText = themeBtn.querySelector('span');
 const themeIcon = themeBtn.querySelector('i');
-themeBtn.addEventListener('click', ()=>{
-    const isDark = body.getAttribute('data-theme')==='dark';
-    body.setAttribute('data-theme',isDark?'light':'dark');
-    themeText.innerText = isDark?"Light":"Dark";
-    themeIcon.className = isDark?"fas fa-sun":"fas fa-moon";
+
+const savedTheme = localStorage.getItem('theme') || 'dark';
+body.setAttribute('data-theme', savedTheme);
+themeText.innerText = savedTheme === 'dark' ? "Dark" : "Light";
+themeIcon.className = savedTheme === 'dark' ? "fas fa-moon" : "fas fa-sun";
+
+themeBtn.addEventListener('click', () => {
+    const isDark = body.getAttribute('data-theme') === 'dark';
+    const newTheme = isDark ? 'light' : 'dark';
+    body.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    themeText.innerText = isDark ? "Light" : "Dark";
+    themeIcon.className = isDark ? "fas fa-sun" : "fas fa-moon";
 });
 
-// Back to home
-function backHome(){
-    document.getElementById('app').innerHTML = '<p class="loading">Type a keyword or see trending videos...</p>';
-    document.getElementById('searchInput').value = '';
+const ENDPOINTS = {
+    FEED: "https://apis.davidcyril.name.ng/nacknaija",
+    SEARCH: "https://apis.davidcyril.name.ng/xxx/xvideos?q=", 
+    RESOLVER: "https://apis.davidcyril.name.ng/xvideo?url=" 
+};
+
+let seenUrls = new Set();
+let cachedFeed = [];
+let isFetching = false;
+let currentMode = 'feed'; 
+let observer;
+
+function showToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerText = message;
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.remove(); }, 3000);
 }
 
-// Pixabay API key
-const PIXABAY_API_KEY = "55953678-ccfdb9ba0957e6de8b0c5bbf8"; // replace with your key
-
-// Load videos (either search or trending)
-async function loadVideos(query="nature"){
-    const app = document.getElementById('app');
-    app.innerHTML = '<p class="loading">Loading videos...</p>';
-    try{
-        const res = await fetch(`https://pixabay.com/api/videos/?key=${PIXABAY_API_KEY}&q=${encodeURIComponent(query)}&per_page=10`);
-        if(!res.ok) throw new Error('API failed');
-        const data = await res.json();
-        if(!data.hits || data.hits.length===0){
-            app.innerHTML = '<p>No videos found.</p>'; return;
+async function fetchWithRetry(url, retries = 3, backoff = 1000) {
+    try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return await res.json();
+    } catch (err) {
+        if (retries > 0) {
+            await new Promise(r => setTimeout(r, backoff));
+            return fetchWithRetry(url, retries - 1, backoff * 2);
         }
-        let html = '';
-        data.hits.forEach(video=>{
-            const videoUrl = video.videos.medium.url;
-            html += `
-            <div class="card">
-                <img src="://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885_1280.jpg" class="thumbnail">
-                <div class="content">
-                    <div class="title">${video.tags}</div>
-                    <div class="views">👁 ${video.views} views</div>
-                    <video controls playsinline webkit-playsinline poster="">
-                        <source src="${videoUrl}" type="video/mp4">
-                    </video>
-                    <div class="actions">
-                        <a href="${videoUrl}" target="_blank" class="btn watch">Watch</a>
-                        <a href="${videoUrl}" download class="btn download">Download</a>
-                    </div>
-                </div>
-            </div>`;
-        });
-        app.innerHTML = html;
-    }catch(err){
-        console.error(err);
-        app.innerHTML = '<p>Failed to load videos.</p>';
+        throw err;
     }
 }
 
-// Search input listener
-document.getElementById('searchInput').addEventListener('keypress', e=>{
-    if(e.key==='Enter'){
-        const query = e.target.value.trim();
-        if(query) loadVideos(query);
+function initObserver() {
+    if (observer) observer.disconnect();
+    observer = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && !isFetching && currentMode === 'feed') {
+            loadMoreFeed();
+        }
+    }, { rootMargin: '200px' });
+    
+    const sentinel = document.getElementById('sentinel');
+    observer.observe(sentinel);
+    sentinel.style.display = 'block';
+}
+
+function stopObserver() {
+    if (observer) observer.disconnect();
+    document.getElementById('sentinel').style.display = 'none';
+}
+
+function backHome() {
+    document.getElementById('searchInput').value = '';
+    loadFeed();
+}
+
+function showSkeletons() {
+    document.getElementById('app').innerHTML = '<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>';
+}
+
+async function fetchUniqueBatch(targetCount) {
+    const fetchPromises = Array.from({ length: targetCount }).map(async () => {
+        try {
+            return await fetchWithRetry(ENDPOINTS.FEED);
+        } catch {
+            return null;
+        }
+    });
+
+    const responses = await Promise.all(fetchPromises);
+    const uniqueResults = [];
+
+    responses.forEach(data => {
+        if (data && data.downloadUrl && !seenUrls.has(data.downloadUrl)) {
+            seenUrls.add(data.downloadUrl);
+            uniqueResults.push(data);
+        }
+    });
+
+    return uniqueResults;
+}
+
+async function loadFeed() {
+    currentMode = 'feed';
+    const app = document.getElementById('app');
+    
+    const stored = sessionStorage.getItem('videoFeedCache');
+    if (stored) {
+        cachedFeed = JSON.parse(stored);
+        cachedFeed.forEach(v => seenUrls.add(v.downloadUrl));
+        renderCards(cachedFeed, false, 'direct');
+        initObserver();
+        return;
     }
+
+    showSkeletons();
+    isFetching = true;
+    
+    const results = await fetchUniqueBatch(10);
+    isFetching = false;
+
+    if (results.length === 0) {
+        app.innerHTML = '<p class="loading">No videos available.</p>'; 
+        return;
+    }
+
+    cachedFeed = results;
+    sessionStorage.setItem('videoFeedCache', JSON.stringify(cachedFeed));
+    
+    renderCards(cachedFeed, false, 'direct');
+    initObserver();
+}
+
+async function loadMoreFeed() {
+    if (isFetching) return;
+    isFetching = true;
+    
+    const results = await fetchUniqueBatch(5);
+    
+    if (results.length > 0) {
+        cachedFeed = [...cachedFeed, ...results];
+        sessionStorage.setItem('videoFeedCache', JSON.stringify(cachedFeed));
+        renderCards(results, true, 'direct');
+    }
+    
+    isFetching = false;
+}
+
+async function executeSearch(query) {
+    if (!query) return;
+    currentMode = 'search';
+    stopObserver();
+    
+    const app = document.getElementById('app');
+    showSkeletons();
+    
+    try {
+        const json = await fetchWithRetry(`${ENDPOINTS.SEARCH}${encodeURIComponent(query)}`);
+        const results = json.data?.results || []; 
+
+        if (results.length === 0) {
+            app.innerHTML = '<p class="loading">No videos found.</p>'; 
+            return;
+        }
+
+        renderCards(results, false, 'resolver');
+    } catch (err) {
+        console.error("Search Execution Error:", err);
+        app.innerHTML = '<p class="loading">Failed to load search results.</p>';
+        sendTelemetry('error', { type: 'search', message: err.message });
+    }
+}
+
+function renderCards(dataArray, append = false, actionContext) {
+    let html = '';
+    const offset = append ? cachedFeed.length - dataArray.length : 0;
+    const fallbackImg = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMzNzQxNTEiLz48L3N2Zz4=";
+
+    dataArray.forEach((video, index) => {
+        const id = actionContext === 'direct' ? `feed-${offset + index}` : (video.id || video.eid);
+        const title = video.title || "Untitled";
+        const coverImg = video.thumbnail?.cover || video.thumbnail || "";
+        const targetUrl = video.url || video.downloadUrl || "";
+        const safeTitle = title.replace(/'/g, "\\'");
+
+        html += `
+        <div class="card" id="card-${id}" tabindex="0">
+            ${coverImg ? `<img src="${coverImg}" class="thumbnail" id="thumb-${id}" loading="lazy" onerror="this.src='${fallbackImg}'" alt="Thumbnail">` : ''}
+            <video id="player-${id}" controls playsinline webkit-playsinline></video>
+            <div class="content">
+                <div class="title">${title}</div>
+                <div class="actions">
+                    ${actionContext === 'direct' 
+                        ? `<button onclick="playDirect('${id}', '${targetUrl}')" class="btn watch" aria-label="Watch">Watch</button>
+                           <button onclick="downloadDirect('${targetUrl}')" class="btn download" aria-label="Download">Download</button>`
+                        : `<button onclick="executeResolver('${targetUrl}', '${id}', 'watch')" class="btn watch" id="btn-watch-${id}" aria-label="Watch">Watch</button>
+                           <button onclick="executeResolver('${targetUrl}', '${id}', 'download')" class="btn download" id="btn-dl-${id}" aria-label="Download">Download</button>`
+                    }
+                    <button onclick="shareVideo('${safeTitle}', '${targetUrl}')" class="btn share" aria-label="Share">Share</button>
+                </div>
+            </div>
+        </div>`;
+    });
+
+    const app = document.getElementById('app');
+    if (append) {
+        app.insertAdjacentHTML('beforeend', html);
+    } else {
+        app.innerHTML = html;
+    }
+}
+
+async function executeResolver(sourceUrl, elementId, actionType) {
+    const btnWatch = document.getElementById(`btn-watch-${elementId}`);
+    const btnDl = document.getElementById(`btn-dl-${elementId}`);
+    const activeBtn = actionType === 'watch' ? btnWatch : btnDl;
+    
+    activeBtn.innerText = "Processing...";
+
+    try {
+        const data = await fetchWithRetry(`${ENDPOINTS.RESOLVER}${encodeURIComponent(sourceUrl)}`);
+        const mediaUrl = data.download_url;
+        
+        if (!mediaUrl) throw new Error('Media URL missing');
+
+        if (actionType === 'watch') {
+            playDirect(elementId, mediaUrl);
+            activeBtn.innerText = "Playing";
+            showToast("Playing video...");
+            sendTelemetry('interaction', { action: 'watch', id: elementId });
+        } else {
+            downloadDirect(mediaUrl);
+            activeBtn.innerText = "Started";
+            showToast("Download started");
+            sendTelemetry('interaction', { action: 'download', id: elementId });
+        }
+    } catch (err) {
+        activeBtn.innerText = "Failed";
+        showToast("Error processing request");
+        sendTelemetry('error', { type: 'resolver', message: err.message });
+    } finally {
+        setTimeout(() => activeBtn.innerText = actionType === 'watch' ? "Watch" : "Download", 2000);
+    }
+}
+
+// Sequential Preloading
+function preloadNextVideo(currentIndex) {
+    if (cachedFeed[currentIndex + 1]) {
+        const nextUrl = cachedFeed[currentIndex + 1].url || cachedFeed[currentIndex + 1].downloadUrl;
+        const link = document.createElement('link');
+        link.rel = 'prefetch';
+        link.href = nextUrl;
+        document.head.appendChild(link);
+    }
+}
+
+function playDirect(elementId, url) {
+    if (!url) return;
+    
+    const idx = parseInt(elementId.replace('feed-', ''));
+    preloadNextVideo(idx);
+
+    document.querySelectorAll('video').forEach(v => {
+        if (!v.paused && v.id !== `player-${elementId}`) {
+            v.pause();
+        }
+    });
+
+    const thumb = document.getElementById(`thumb-${elementId}`);
+    const player = document.getElementById(`player-${elementId}`);
+    
+    if (thumb) thumb.style.display = 'none';
+    player.style.display = 'block';
+    
+    if (url.includes('.m3u8') && typeof Hls !== 'undefined' && Hls.isSupported()) {
+        const hls = new Hls({ autoStartLoad: true, startLevel: -1, capLevelToPlayerSize: true });
+        hls.loadSource(url);
+        hls.attachMedia(player);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => player.play());
+    } else {
+        player.src = url;
+        player.play();
+    }
+}
+
+function downloadDirect(url) {
+    if (!url) return;
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = '';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    showToast("Download started");
+}
+
+async function shareVideo(title, url) {
+    if (navigator.share) {
+        try { await navigator.share({ title, url }); } catch (err) { console.error(err); }
+    } else {
+        navigator.clipboard.writeText(url).then(() => showToast("Link copied"));
+    }
+}
+
+const handleSearch = (query) => {
+    if (query) executeSearch(query);
+    else loadFeed();
+};
+
+document.getElementById('searchInput').addEventListener('input', e => {
+    const val = e.target.value.trim();
+    if (val.length > 2 || val === "") handleSearch(val);
 });
 
-// Load trending videos on page load
-window.addEventListener('load', ()=>loadVideos());
+window.addEventListener('load', loadFeed);
 </script>
 
 </body>
